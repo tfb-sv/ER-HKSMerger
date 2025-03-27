@@ -3,7 +3,7 @@
 -- Refined from decompiles by Vawser
 -- Curated at: https://github.com/ividyon/EldenRingHKS
 ------------------------------------------
--- Version 15 (For ER HKS last updated in 1.14)
+-- Version 11 for ER version 1.12.1
 ------------------------------------------
 -- Changelog:
 -- 2022-12-15 - AshenOne: ExecMagic (line 2090), moving an if block so left-hand casting works as intended
@@ -41,21 +41,10 @@
 -- 2024-07-17 - Exelot: 
 --              - Fixed a bug with SetSwordArtsPointInfo causing various ashes to not having the right Ash of War
 --                while not having enough stats.
---              - Added a missing check for jumping.
---              - Fixed a bug that would cause Ashes of War such as Carian Grandeur to not have the ability to be cast uncharged.
--- 2024-07-18 - ivi: Fixed SwordArtsDiffCategory & SwordArtsPutOppositeWeapon function changes not carried over from new common_define (Twinblade AotC: Wings)
--- 2024-07-23 - Exelot:
---              - Renamed env GetWeaponID into a less confusing name: GetSwordArtID
---              - Renamed act Test_SpEffectDelete into ClearSpEffect and added a comment for it's args.
---              - Added a new logic expansion section with a new function that allows for easy addition of new Weapon Catalysts.
--- 2024-07-30 - Exelot: Updated to ER v1.13
--- 2024-08-29 - ivi: Fixed SwordArtsCategory table missing variations of existing arts for new weapon types
--- 2024-09-11 - Exelot: Updated to ER v1.14
-
+--              - Added a missing check.
 ------------------------------------------
 -- Known issues:
 -- N/A
-
 ------------------------------------------
 -- Core: Functions
 ------------------------------------------
@@ -703,13 +692,13 @@ function GetSwordArtInfo()
             art_hand = HAND_LEFT
         end
 
-        art_id = env(GetSwordArtID, art_hand)
+        art_id = env(GetWeaponID, art_hand)
     else
-        local weaponswordartid = env(GetSwordArtID, HAND_LEFT)
+        local weaponswordartid = env(GetWeaponID, HAND_LEFT)
 
         if IsShieldArts(weaponswordartid) == FALSE and IsArrowStanceArts(weaponswordartid) == FALSE then
             art_hand = HAND_RIGHT
-            art_id = env(GetSwordArtID, HAND_RIGHT)
+            art_id = env(GetWeaponID, HAND_RIGHT)
         else
             art_hand = HAND_LEFT
             art_id = weaponswordartid
@@ -738,7 +727,7 @@ function IsEnableSwordArts()
     end
 
     if style ~= HAND_LEFT_BOTH and c_SwordArtsHand == 0 then
-        if IsWeaponCatalyst(sp_kind) == TRUE then
+        if sp_kind == 293 then
             return FALSE
         end
         if IsShieldArts(arts_id) == TRUE then
@@ -747,7 +736,7 @@ function IsEnableSwordArts()
             return FALSE
         end
     else
-        if style == HAND_RIGHT and IsWeaponCatalyst(sp_kind) == TRUE then
+        if style == HAND_RIGHT and sp_kind == 293 then
             return FALSE
         end
         if arts_id ~= 17 and arts_id ~= SWORDARTS_INVALID then
@@ -1020,6 +1009,16 @@ function HasSwordArtPoint(button, hand)
 end
 
 function SetSwordArtsPointInfo(button, is_point_consume, to_state_event)
+    local hand = c_SwordArtsHand
+    
+    if is_point_consume == TRUE then
+        act(ReserveArtsPointsUse, button, hand)
+    end
+    
+    local sel = 0
+    local isNoMPUse = FALSE
+    local artsID = env(GetWeaponID, hand)
+    
     local aow_list_noFPUse = {
         17, -- Torch Attack
         92, -- Parry
@@ -1027,16 +1026,6 @@ function SetSwordArtsPointInfo(button, is_point_consume, to_state_event)
         94, -- UNUSED
         112 -- Kick
     }
-
-    local hand = c_SwordArtsHand
-
-    if is_point_consume == TRUE then
-        act(ReserveArtsPointsUse, button, hand)
-    end
-
-    local sel = 0
-    local isNoMPUse = FALSE
-    local artsID = env(GetSwordArtID, hand)
 
     if Contains(aow_list_noFPUse, artsID) == TRUE then
         isNoMPUse = TRUE
@@ -1527,7 +1516,7 @@ function GetAttackRequest(is_guard)
             -- 2H Heavy
         else
             local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, hand)
-            if IsWeaponCatalyst(sp_kind) == TRUE then
+            if sp_kind == 293 then
                 return ATTACK_REQUEST_INVALID
             end
             if is_both == TRUE then
@@ -1614,7 +1603,7 @@ function GetAttackRequest(is_guard)
                 return ATTACK_REQUEST_LEFT_CROSSBOW2
             end
             local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-            if IsWeaponCatalyst(sp_kind) == TRUE then
+            if sp_kind == 293 then
                 return ATTACK_REQUEST_INVALID
             end
         end
@@ -1821,7 +1810,6 @@ function ExecAttack(r1, r2, l1, l2, b1, b2, is_guard, blend_type, artsr1, artsr2
         if (c_SwordArtsID == 313 or c_SwordArtsID == 273)
             and (r2 == "W_SwordArtsOneShotComboEnd" or r2 == "W_SwordArtsOneShotComboEnd_2") then
             artsr2 = TRUE
-            SetVariable("SwordArtsOneShotComboCategory", 0)
         end
 
         if artsr2 == TRUE then
@@ -1960,12 +1948,6 @@ function ExecAttack(r1, r2, l1, l2, b1, b2, is_guard, blend_type, artsr1, artsr2
 
         ExecEventAllBody(l1)
     elseif request == ATTACK_REQUEST_BOTH_HEAVY then
-        -- DLC 1.13.1: Dynastic Sickleplay, Raging Beast
-        if (c_SwordArtsID == 313 or c_SwordArtsID == 273) and (r2 == "W_SwordArtsOneShotComboEnd" or r2 == "W_SwordArtsOneShotComboEnd_2") then
-            artsr2 = TRUE
-            SetVariable("SwordArtsOneShotComboCategory", 0)
-        end
-
         if artsr2 == TRUE then
             SetSwordArtsPointInfo(ACTION_ARM_R2, TRUE, b2)
         end
@@ -2441,7 +2423,7 @@ function ExecAttack(r1, r2, l1, l2, b1, b2, is_guard, blend_type, artsr1, artsr2
         SetVariable("TurnAngleReal", turn_angle_real)
         SetSwordArtsPointInfo(ACTION_ARM_L2, TRUE)
 
-        if env(GetSpEffectID, 102360) == FALSE and arts_id ~= 313 then
+        if env(GetSpEffectID, 102360) == FALSE then
             if GetVariable("IsEnoughArtPointsL2") == 1 then
                 AddStamina(STAMINA_REDUCE_ARTS_QUICKSTEP * STAMINA_CONSUMERATE_LOWSTATUS)
             else
@@ -3016,7 +2998,7 @@ function IsUseStealthAttack(is_dual)
 
     if is_dual == TRUE then
         if GetEquipType(HAND_RIGHT, WEAPON_CATEGORY_STRAIGHT_SWORD, WEAPON_CATEGORY_TWINBLADE, WEAPON_CATEGORY_RAPIER,
-            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_SPEAR, WEAPON_CATEGORY_LARGE_SPEAR, WEAPON_CATEGORY_BACKHAND_SWORD) == TRUE then
+            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_SPEAR, WEAPON_CATEGORY_LARGE_SPEAR) == TRUE then
             return TRUE
         end
     elseif c_Style == HAND_RIGHT_BOTH or c_Style == HAND_LEFT_BOTH then
@@ -3037,7 +3019,7 @@ function IsUseStealthAttack(is_dual)
         end
         if GetEquipType(hand, WEAPON_CATEGORY_TORCH, WEAPON_CATEGORY_STRAIGHT_SWORD, WEAPON_CATEGORY_TWINBLADE,
             WEAPON_CATEGORY_EXTRALARGE_SWORD, WEAPON_CATEGORY_RAPIER, WEAPON_CATEGORY_LARGE_RAPIER,
-            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_BACKHAND_SWORD) == TRUE then
+            WEAPON_CATEGORY_CURVEDSWORD) == TRUE then
             return TRUE
         end
     else
@@ -3052,7 +3034,7 @@ function IsUseStealthAttack(is_dual)
         end
         if GetEquipType(hand, WEAPON_CATEGORY_TORCH, WEAPON_CATEGORY_STRAIGHT_SWORD, WEAPON_CATEGORY_TWINBLADE,
             WEAPON_CATEGORY_EXTRALARGE_SWORD, WEAPON_CATEGORY_RAPIER, WEAPON_CATEGORY_LARGE_RAPIER,
-            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_BACKHAND_SWORD) == TRUE then
+            WEAPON_CATEGORY_CURVEDSWORD) == TRUE then
             return TRUE
         end
     end
@@ -3065,8 +3047,8 @@ function ExecArtsStance(blend_type)
     end
     local arts_id = c_SwordArtsID
     local is_arrow = GetEquipType(c_SwordArtsHand, WEAPON_CATEGORY_ARROW, WEAPON_CATEGORY_SMALL_ARROW,
-        WEAPON_CATEGORY_LARGE_ARROW)
-    local is_crossbow = GetEquipType(HAND_LEFT, WEAPON_CATEGORY_CROSSBOW, WEAPON_CATEGORY_BALLISTA)
+        WEAPON_CATEGORY_LARGE_ARROW, WEAPON_CATEGORY_BALISTA)
+    local is_crossbow = GetEquipType(HAND_LEFT, WEAPON_CATEGORY_CROSSBOW)
 
     if c_Style == HAND_RIGHT and (is_arrow == TRUE or is_crossbow == TRUE) then
         return FALSE
@@ -3097,8 +3079,6 @@ function ExecArtsStance(blend_type)
     if blend_type == ALLBODY and MoveStart(LOWER, Event_Move, FALSE) == TRUE then
         blend_type = UPPER
     end
-
-    SetVariable("SwordArtsOneShotComboCategory", 0)
 
     if c_SwordArtsID == 318 then
         SetSwordArtsPointInfo(ACTION_ARM_R1, TRUE)
@@ -3151,10 +3131,10 @@ function ExecMagic(quick_type, blend_type, is_ride)
     local buttonR = ACTION_ARM_MAGIC_R
     local buttonL = ACTION_ARM_MAGIC_L
 
-    if IsWeaponCatalyst(sp_kind_R) == TRUE then
+    if sp_kind_R == 293 then
         buttonR = ACTION_ARM_MAGIC_R2
     end
-    if IsWeaponCatalyst(sp_kind_L) == TRUE and is_ride == FALSE then
+    if sp_kind_L == 293 and is_ride == FALSE then
         buttonL = ACTION_ARM_MAGIC_L2
     end
 
@@ -3184,13 +3164,13 @@ function ExecMagic(quick_type, blend_type, is_ride)
         delayActRequestNo = ACTION_ARM_MAGIC_R2
         if style == HAND_LEFT_BOTH then
             local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-            if IsWeaponCatalyst(sp_kind) == FALSE then
+            if sp_kind ~= 293 then
                 return FALSE
             end
             wep_hand = HAND_LEFT
         else
             local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_RIGHT)
-            if IsWeaponCatalyst(sp_kind) == FALSE then
+            if sp_kind ~= 293 then
                 return FALSE
             end
             wep_hand = HAND_RIGHT
@@ -3212,7 +3192,7 @@ function ExecMagic(quick_type, blend_type, is_ride)
         delayActRequestNo = ACTION_ARM_MAGIC_L2
         if style == HAND_RIGHT then
             local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-            if IsWeaponCatalyst(sp_kind) == FALSE then
+            if sp_kind ~= 293 then
                 return FALSE
             end
             wep_hand = HAND_LEFT
@@ -3296,7 +3276,7 @@ function ExecMagic(quick_type, blend_type, is_ride)
         == MAGIC_REQUEST_BLASTING or magic_index == MAGIC_REQUEST_DRILL or magic_index == MAGIC_REQUEST_MAGIC_SPARK
         or magic_index == 115 or magic_index == 120 or magic_index == 121 or magic_index == 157 or magic_index == 82
         or magic_index == 150 or magic_index == 156 or magic_index == 161 then
-        if IsWeaponCatalyst(env(GetEquipWeaponSpecialCategoryNumber, wep_hand)) == TRUE then
+        if env(GetEquipWeaponSpecialCategoryNumber, wep_hand) == 293 then
             SetVariable("Magic_SpecialStaffCategory", 2)
         else
             SetVariable("Magic_SpecialStaffCategory", 0)
@@ -4153,7 +4133,6 @@ function ExecJump()
     SetVariable("JumpMotion_Override", 0.009999999776482582)
     SetVariable("JumpAttack_Land", 0)
     SetVariable("SwingPose", 0)
-    IS_ATTACKED_JUMPMAGIC = FALSE
 
     if GetVariable("IsEnableToggleDashTest") == 2 then
         SetVariable("ToggleDash", 0)
@@ -5455,7 +5434,7 @@ function ExecDamage(is_parry, is_attackwhileguard)
     if env(IsFalling) == TRUE and env(GetBehaviorID, 10) == TRUE and height >= 10 then
         damage_level = DAMAGE_LEVEL_NONE
     end
-    if env(GetIsWeakPoint) == TRUE and env(GetBehaviorID, 15) == FALSE then
+    if env(GetIsWeakPoint) == TRUE then
         CalcDamageCount()
         SetVariable("DamageDirection", damage_angle)
         act(SetDamageAnimType, DAMAGE_FLAG_WEAK)
@@ -7556,7 +7535,7 @@ function ArtsParryCommonFunction()
     return FALSE
 end
 
-function ArtsStanceCommonFunction(r1, r2, l1, l2, b1, b2, blend_type, turn_type, artsr1, artsr2, is_stance_end, enable_turn)
+function ArtsStanceCommonFunction(r1, r2, l1, l2, b1, b2, blend_type, turn_type, artsr1, artsr2, is_stance_end)
     if is_stance_end == FALSE then
         SetThrowAtkInvalid()
     end
@@ -7595,7 +7574,7 @@ function ArtsStanceCommonFunction(r1, r2, l1, l2, b1, b2, blend_type, turn_type,
     if ExecAttack(r1, r2, l1, l2, b1, b2, FALSE, blend_type, artsr1, artsr2, FALSE) == TRUE then
         return TRUE
     end
-    if blend_type ~= UPPER and enable_turn and ExecQuickTurn(LOWER, turn_type) == TRUE then
+    if blend_type ~= UPPER and ExecQuickTurn(LOWER, turn_type) == TRUE then
         return TRUE
     end
     if MoveStartonCancelTiming(Event_Move, FALSE) == TRUE then
@@ -8194,7 +8173,6 @@ function DefaultBackStep_onActivate()
 end
 
 function DefaultBackStep_onUpdate()
-    act(Unknown163)
     act(DisallowAdditiveTurning, TRUE)
 
     if EvasionCommonFunction(FALL_TYPE_DEFAULT, "W_AttackRightBackstep", "W_AttackRightHeavy1Start",
@@ -8209,7 +8187,6 @@ function DefaultBackStep_onDeactivate()
 end
 
 function BackStepGuardOn_UpperLayer_onUpdate()
-    act(Unknown163)
     if ExecGuardOnCancelTiming(TO_GUARDON, ALLBODY) == TRUE then
         return
     end
@@ -8221,7 +8198,6 @@ function BackStepGuardOn_UpperLayer_onUpdate()
 end
 
 function BackStepGuardEnd_UpperLayer_onUpdate()
-    act(Unknown163)
     if env(IsAnimEnd, 1) == TRUE or env(GetEventEzStateFlag, 0) == TRUE then
         ExecEventSyncNoReset("Event_BackStepGuardOut")
     end
@@ -11490,12 +11466,8 @@ function DrawStanceRightStart_Upper_onUpdate()
         b1 = "W_SwordArtsStanceAttackLight180"
         b2 = "W_SwordArtsStanceAttackHeavy180"
     end
-    local enable_turn = TRUE
-    if c_SwordArtsID == 309 then
-        enable_turn = FALSE
-    end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type,
-        TURN_TYPE_STANCE, TRUE, TRUE, FALSE, enable_turn) == TRUE then
+        TURN_TYPE_STANCE, TRUE, TRUE, FALSE) == TRUE then
         return
     end
 
@@ -11576,7 +11548,7 @@ function DrawStanceRightLoop_Upper_onUpdate()
         b2 = "W_SwordArtsStanceAttackHeavy180"
     end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type,
-        TURN_TYPE_STANCE, TRUE, TRUE, FALSE, TRUE) == TRUE then
+        TURN_TYPE_STANCE, TRUE, TRUE, FALSE) == TRUE then
         return
     end
 
@@ -11640,7 +11612,7 @@ function DrawStanceNoSyncLoop_Upper_onUpdate()
         b2 = "W_SwordArtsStanceAttackHeavy180"
     end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type,
-        TURN_TYPE_STANCE, TRUE, TRUE, FALSE, FALSE) == TRUE then
+        TURN_TYPE_STANCE, TRUE, TRUE, FALSE) == TRUE then
         return
     end
 
@@ -11688,7 +11660,7 @@ function DrawStanceNoSyncLoopMax_Upper_onUpdate()
         b2 = "W_DrawStanceRightAttackMaxHeavyL90"
     end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type, TRUE, TRUE,
-        FALSE, FALSE) == TRUE then
+        FALSE) == TRUE then
         return
     end
 
@@ -11724,13 +11696,9 @@ function DrawStanceRightEnd_Upper_onUpdate()
             return
         end
     end
-    local enable_turn = TRUE
-    if c_SwordArtsID == 309 then
-        enable_turn = FALSE
-    end
-    if ArtsStanceCommonFunction("W_AttackRightLight1", "W_AttackRightHeavy1Start", "W_AttackLeftLight1", "W_AttackLeftHeavy1",
-        "W_AttackBothLight1", "W_AttackBothHeavy1Start", blend_type,
-        TURN_TYPE_DEFAULT, FALSE, FALSE, TRUE, enable_turn) == TRUE then
+    if ArtsStanceCommonFunction("W_AttackRightLight1", "W_AttackRightHeavy1Start", "W_AttackLeftLight1",
+        "W_AttackLeftHeavy1", "W_AttackBothLight1", "W_AttackBothHeavy1Start", blend_type, TURN_TYPE_DEFAULT, FALSE,
+        FALSE, TRUE) == TRUE then
         return
     end
     if HalfBlendUpperCommonFunction(lower_state) == TRUE then
@@ -12084,9 +12052,9 @@ function SwordArtsOneShot_onUpdate()
     end
     if env(ActionDuration, ACTION_ARM_L2) <= 0 then
         if env(GetSpEffectID, 100285) == TRUE then
+            local arts_cat = GetSwordArtsDiffCategory(c_SwordArtsID, idle_cat, wep_cat)
             local idle_cat = env(GetStayAnimCategory)
             local wep_cat = env(GetEquipWeaponCategory, c_SwordArtsHand)
-            local arts_cat = GetSwordArtsDiffCategory(c_SwordArtsID, idle_cat, wep_cat)
             local arts_idx = 0
 
             if arts_cat == WEAPON_CATEGORY_LARGE_SHIELD then
@@ -12499,7 +12467,6 @@ function SwordArtsOneShotShieldLeft_onUpdate()
         local wep_cat = env(GetEquipWeaponCategory, c_SwordArtsHand)
         local arts_cat = GetSwordArtsDiffCategory(c_SwordArtsID, idle_cat, wep_cat)
         local arts_idx = 0
-
         if arts_cat == WEAPON_CATEGORY_LARGE_SHIELD then
             arts_idx = 1
         elseif arts_cat == WEAPON_CATEGORY_SMALL_SHIELD then
@@ -12668,7 +12635,6 @@ function SwordArtsOneShotShieldBoth_onUpdate()
         local wep_cat = env(GetEquipWeaponCategory, c_SwordArtsHand)
         local arts_cat = GetSwordArtsDiffCategory(c_SwordArtsID, idle_cat, wep_cat)
         local arts_idx = 0
-
         if arts_cat == 47 then
             arts_idx = 1
         elseif arts_cat == 48 then
@@ -12731,10 +12697,10 @@ function SwordArtsHalfOneShotShieldBoth_Upper_onUpdate()
         canThrow = TRUE
     end
     local blend_type, lower_state = GetHalfBlendInfo()
+    local arts_cat = 0
     local idle_cat = env(GetStayAnimCategory)
     local wep_cat = env(GetEquipWeaponCategory, c_SwordArtsHand)
-    local arts_cat = GetSwordArtsDiffCategory(c_SwordArtsID, idle_cat, wep_cat)
-
+    arts_cat = GetSwordArtsDiffCategory(c_SwordArtsID, idle_cat, wep_cat)
     local arts_idx = 0
     if arts_cat == 47 then
         arts_idx = 1
@@ -13530,7 +13496,6 @@ function SetSwordArtsWepCategory_DrawStanceRightAttackLight()
     local wep_cat = env(GetEquipWeaponCategory, c_SwordArtsHand)
     local arts_cat = GetSwordArtsDiffCategory(c_SwordArtsID, idle_cat, wep_cat)
     local arts_idx = 0
-
     if arts_cat == WEAPON_CATEGORY_LARGE_ARROW then
         arts_idx = 1
     end
@@ -13617,15 +13582,13 @@ function CrossbowStanceCommonFunction(blend_type, IsShooting)
         act(ResetInputQueue)
         g_ArrowSlot = 1
         act(ChooseBowAndArrowSlot, 1)
-
         if env(IsOutOfAmmo, arrowHand) == TRUE then
             ExecEventHalfBlend(Event_AttackCrossbowRightEmpty, blend_type)
             return TRUE
         end
         if env(GetStamina) > 0 then
-            SetSwordArtsPointInfo(ACTION_ARM_R1, TRUE)
+            SetSwordArtsPointInfo(ACTION_ARM_R2, TRUE)
             SetSwordArtsWepCategory_DrawStanceRightAttackLight()
-
             if IsHalfBlendArts(c_SwordArtsID) == TRUE then
                 local blend_type, lower_state = GetHalfBlendInfo()
                 ExecEventHalfBlend(Event_DrawStanceHalfRightAttackLight, blend_type)
@@ -15277,7 +15240,7 @@ function MagicLoopRight_Upper_onUpdate()
 
     local button = ACTION_ARM_R1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_R2
     end
 
@@ -15312,7 +15275,7 @@ function MagicFireRight_Upper_onUpdate()
 
     local button = ACTION_ARM_R1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_R2
     end
 
@@ -15396,7 +15359,7 @@ function MagicLoopLeft_Upper_onUpdate()
     end
     local button = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_L2
     end
     if env(ActionDuration, button) <= 0 or env(IsMagicUseable, HAND_LEFT, 1) == FALSE or env(GetStamina) <= 0 then
@@ -15447,7 +15410,7 @@ function MagicFireRight2_Upper_onUpdate()
     end
     local button = ACTION_ARM_R1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_R2
     end
     if env(GetSpEffectID, 100610) == TRUE and (env(ActionDuration, button) <= 0 or mp_condition >= env(GetFP)) then
@@ -15481,7 +15444,7 @@ function MagicFireRight3_Upper_onUpdate()
     end
     local button = ACTION_ARM_R1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_R2
     end
     if env(GetSpEffectID, 100610) == TRUE and (env(ActionDuration, button) <= 0 or mp_condition >= env(GetFP)) then
@@ -15513,7 +15476,7 @@ function MagicFireLeft_Upper_onUpdate()
 
     local button = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_L2
     end
 
@@ -15611,7 +15574,7 @@ function MagicFireLeft2_Upper_onUpdate()
 
     local button = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_L2
     end
 
@@ -15657,7 +15620,7 @@ function MagicFireLeft3_Upper_onUpdate()
 
     local button = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_L2
     end
 
@@ -15860,7 +15823,7 @@ function MagicFireRightJump_Upper_onUpdate()
 
     local button = ACTION_ARM_R1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_R2
     end
 
@@ -15906,7 +15869,7 @@ function MagicFireLeftJump_Upper_onUpdate()
     local wep_hand = HAND_LEFT
     local button = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         button = ACTION_ARM_L2
     end
     if env(GetSpEffectID, 100610) == TRUE
@@ -17161,6 +17124,7 @@ function Event60810_onActivate()
 end
 
 function Event60810_onUpdate()
+    act(SetIsEventActionPossible, TRUE)
     if EventCommonFunction() == TRUE then
         return
     end
@@ -17171,6 +17135,7 @@ function Event60811_onActivate()
 end
 
 function Event60811_onUpdate()
+    act(SetIsEventActionPossible, TRUE)
     if EventCommonFunction() == TRUE then
         return
     end
@@ -18299,31 +18264,18 @@ function Update()
         end
     end
 
-    -- Euporia
-    local isChangingWeaponRight = FALSE
-    local isChangingWeaponLeft = FALSE
-    if IsNodeActive("WeaponChangeStart_Selector00") == TRUE or IsNodeActive("WeaponChangeEnd_Selector00") == TRUE or
-        IsNodeActive("WeaponChangeStart_Selector01") == TRUE or IsNodeActive("WeaponChangeEnd_Selector01") == TRUE or
-        IsNodeActive("RideWeaponChangeStart_Selector") == TRUE or IsNodeActive("RideWeaponChangeEnd_Selector") == TRUE then
-
-        if GetVariable("WeaponChangeType") <= WEAPON_CHANGE_REQUEST_RIGHT_SPEAR and GetVariable("WeaponChangeType") ~= WEAPON_CHANGE_REQUEST_INVALID then
-            isChangingWeaponRight = TRUE
-        else
-            isChangingWeaponLeft = TRUE
-        end
-    end
     if env(GetSpEffectID, 19875) == TRUE then
-        if isChangingWeaponLeft == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_LEFT_BOTH) and env(GetSwordArtID, HAND_LEFT) == 328 then
+        if env(GetWeaponID, HAND_LEFT) == 328 then
             act(AddSpEffect, 19887)
         end
-        if isChangingWeaponRight == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_RIGHT_BOTH) and env(GetSwordArtID, HAND_RIGHT) == 328 then
+        if env(GetWeaponID, HAND_RIGHT) == 328 then
             act(AddSpEffect, 19883)
         end
     elseif env(GetSpEffectID, 19874) == TRUE then
-        if isChangingWeaponLeft == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_LEFT_BOTH) and env(GetSwordArtID, HAND_LEFT) == 328 then
+        if env(GetWeaponID, HAND_LEFT) == 328 then
             act(AddSpEffect, 19885)
         end
-        if isChangingWeaponRight == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_RIGHT_BOTH) and env(GetSwordArtID, HAND_RIGHT) == 328 then
+        if env(GetWeaponID, HAND_RIGHT) == 328 then
             act(AddSpEffect, 19881)
         end
     end
@@ -18978,7 +18930,7 @@ function ExecRideAttack(r1, r2, l1, l2)
     local is_staff = GetEquipType(attackHand, WEAPON_CATEGORY_STAFF)
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, attackHand)
     local is_weaponStaff = FALSE
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         is_weaponStaff = TRUE
     end
 
@@ -19609,7 +19561,7 @@ function RideMagicFire_onUpdate()
     local buttonL = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
 
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         buttonR = ACTION_ARM_R2
         buttonL = ACTION_ARM_L2
     end
@@ -19659,7 +19611,7 @@ function RideMagicLoop_onUpdate()
     local buttonL = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
 
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         buttonR = ACTION_ARM_R2
         buttonL = ACTION_ARM_L2
     end
@@ -19717,7 +19669,7 @@ function RideMagicFireCombo1_onUpdate()
     local buttonR = ACTION_ARM_R1
     local buttonL = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         buttonR = ACTION_ARM_R2
         buttonL = ACTION_ARM_L2
     end
@@ -19776,7 +19728,7 @@ function RideMagicFireCombo2_onUpdate()
     local buttonR = ACTION_ARM_R1
     local buttonL = ACTION_ARM_L1
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         buttonR = ACTION_ARM_R2
         buttonL = ACTION_ARM_L2
     end
@@ -23532,7 +23484,7 @@ function JumpCommonFunction(jump_type)
     local is_arrow = GetEquipType(arrowHand, WEAPON_CATEGORY_SMALL_ARROW, WEAPON_CATEGORY_ARROW,
         WEAPON_CATEGORY_LARGE_ARROW, WEAPON_CATEGORY_CROSSBOW, WEAPON_CATEGORY_BALLISTA)
 
-    if GetVariable("JumpAttackForm") == 0 and is_arrow == TRUE then
+    if is_arrow == TRUE then
         if env(ActionRequest, ACTION_ARM_R1) == TRUE then
             act(ChooseBowAndArrowSlot, 0)
             g_ArrowSlot = 0
@@ -23552,7 +23504,7 @@ function JumpCommonFunction(jump_type)
     local isWeaponStaff = FALSE
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
 
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         isWeaponStaff = TRUE
     end
 
@@ -23755,12 +23707,12 @@ function ExecJumpMagic(jump_type)
     local buttonL = ACTION_ARM_MAGIC_L
 
     local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, wep_hand)
-    if IsWeaponCatalyst(sp_kind) == TRUE then
+    if sp_kind == 293 then
         buttonR = ACTION_ARM_MAGIC_R2
     end
 
     local sp_kind_L = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
-    if c_Style == HAND_RIGHT and IsWeaponCatalyst(sp_kind_L) == TRUE then
+    if c_Style == HAND_RIGHT and sp_kind_L == 293 then
         buttonL = ACTION_ARM_MAGIC_L2
     end
 
@@ -23789,13 +23741,13 @@ function ExecJumpMagic(jump_type)
         delayActRequestNo = ACTION_ARM_MAGIC_R
 
         if style == HAND_LEFT_BOTH then
-            if GetEquipType(HAND_LEFT, WEAPON_CATEGORY_STAFF) == FALSE and IsWeaponCatalyst(sp_kind) == FALSE then
+            if GetEquipType(HAND_LEFT, WEAPON_CATEGORY_STAFF) == FALSE and sp_kind ~= 293 then
                 return FALSE
             end
 
             wep_hand = HAND_LEFT
         else
-            if GetEquipType(HAND_RIGHT, WEAPON_CATEGORY_STAFF) == FALSE and IsWeaponCatalyst(sp_kind) == FALSE then
+            if GetEquipType(HAND_RIGHT, WEAPON_CATEGORY_STAFF) == FALSE and sp_kind ~= 293 then
                 return FALSE
             end
 
@@ -23806,7 +23758,7 @@ function ExecJumpMagic(jump_type)
         if style == HAND_RIGHT_BOTH or style == HAND_LEFT_BOTH then
             return FALSE
         end
-        if GetEquipType(HAND_LEFT, WEAPON_CATEGORY_STAFF) == FALSE and IsWeaponCatalyst(sp_kind_L) == FALSE then
+        if GetEquipType(HAND_LEFT, WEAPON_CATEGORY_STAFF) == FALSE and sp_kind_L ~= 293 then
             return FALSE
         end
 
@@ -23960,7 +23912,7 @@ function ExecFallMagic()
         if style == HAND_LEFT_BOTH then
             local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
 
-            if IsWeaponCatalyst(sp_kind) == FALSE then
+            if sp_kind ~= 293 then
                 return FALSE
             end
 
@@ -23968,7 +23920,7 @@ function ExecFallMagic()
         else
             local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_RIGHT)
 
-            if IsWeaponCatalyst(sp_kind) == FALSE then
+            if sp_kind ~= 293 then
                 return FALSE
             end
 
@@ -23983,7 +23935,7 @@ function ExecFallMagic()
 
         local sp_kind = env(GetEquipWeaponSpecialCategoryNumber, HAND_LEFT)
 
-        if IsWeaponCatalyst(sp_kind) == FALSE then
+        if sp_kind ~= 293 then
             return FALSE
         end
 
@@ -25103,16 +25055,16 @@ SWORD_ART_DIFF_CAT_POLEARM_LARGE_SHIELD = 9
 -- 20-59: Weapon Category
 SwordArtsCategory = {
     [0] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [1] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_FIST, WEAPON_CATEGORY_DUELING_SHIELD},
-    [2] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [1] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_FIST},
+    [2] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [3] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM,
-           WEAPON_CATEGORY_TWINBLADE, WEAPON_CATEGORY_BACKHAND_SWORD},
+           WEAPON_CATEGORY_TWINBLADE},
     [4] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
-    [5] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [5] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [6] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [7] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
-    [8] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_DUELING_SHIELD},
-    [9] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_DUELING_SHIELD},
+    [8] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
+    [9] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
     [10] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [11] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [12] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
@@ -25122,28 +25074,28 @@ SwordArtsCategory = {
     [16] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [17] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [18] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM},
-    [19] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD},
+    [19] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [20] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [21] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [22] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_TWINBLADE},
     [23] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_TWINBLADE},
     [24] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM,
-            WEAPON_CATEGORY_TWINBLADE, WEAPON_CATEGORY_BACKHAND_SWORD},
+            WEAPON_CATEGORY_TWINBLADE},
     [25] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [50] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [50] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [51] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [52] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_TWINBLADE},
-    [53] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [53] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [54] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, WEAPON_CATEGORY_TWINBLADE},
     [55] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [56] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [57] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON},
-    [58] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD, WEAPON_CATEGORY_DUELING_SHIELD},
+    [58] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [59] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [61] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [62] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [63] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD},
-    [64] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_FIST, WEAPON_CATEGORY_MARTIAL_ARTS, WEAPON_CATEGORY_DUELING_SHIELD, WEAPON_CATEGORY_BEAST_CLAW},
+    [63] = {SWORD_ART_DIFF_CAT_DEFAULT},
+    [64] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_FIST},
     [65] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM},
     [66] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [67] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25151,24 +25103,24 @@ SwordArtsCategory = {
     [69] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [70] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [71] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [72] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD},
+    [72] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [73] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [74] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [75] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [76] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [90] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_DUELING_SHIELD},
+    [90] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD},
     [91] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM,
             SWORD_ART_DIFF_CAT_LARGE_WEAPON_SMALL_SHIELD, SWORD_ART_DIFF_CAT_POLEARM_SMALL_SHIELD,
             SWORD_ART_DIFF_CAT_LARGE_WEAPON_LARGE_SHIELD, SWORD_ART_DIFF_CAT_POLEARM_LARGE_SHIELD,
-            WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_DUELING_SHIELD},
+            WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD},
     [92] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_SHORT_SWORD, WEAPON_CATEGORY_CURVEDSWORD,
-            WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_THROW_DAGGER},
+            WEAPON_CATEGORY_SMALL_SHIELD},
     [93] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
     [94] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [95] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [96] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [97] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [98] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_DUELING_SHIELD},
+    [98] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD},
     [99] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [100] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [101] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25183,7 +25135,7 @@ SwordArtsCategory = {
     [111] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [112] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [113] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [114] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [114] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [115] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [116] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [117] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25191,19 +25143,19 @@ SwordArtsCategory = {
     [130] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [131] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [132] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [133] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [133] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [134] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [135] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [135] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [136] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [137] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD, WEAPON_CATEGORY_LARGE_KATANA},
+    [137] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [140] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [141] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [142] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [142] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [143] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [144] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [150] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, WEAPON_CATEGORY_FIST, WEAPON_CATEGORY_MARTIAL_ARTS, WEAPON_CATEGORY_PERFUME_BOTTLE, WEAPON_CATEGORY_DUELING_SHIELD, WEAPON_CATEGORY_BEAST_CLAW},
-    [151] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
-    [152] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [150] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, WEAPON_CATEGORY_FIST},
+    [151] = {SWORD_ART_DIFF_CAT_DEFAULT},
+    [152] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [155] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [156] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [157] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25266,22 +25218,20 @@ SwordArtsCategory = {
 -- 9: Idle (Polearm) + Large Shield
 -- 20-59: Weapon Category
 function GetSwordArtsDiffCategory(artID, idleCat, wepCat)
-    -- If TAE ID above 770 (except 796), no overrides, only a single default animation. Also DLC stuff
-    if 170 <= artID and artID < 255 and artID ~= 196 or artID >= 300 and artID ~= 305 and artID ~= 357 and artID ~= 399 or artID == 275 or artID == 272 then
+    -- If TAE ID above 770 (except 796), no overrides, only a single default animation.
+    if artID >= 170 and artID ~= 196 then
         return SWORD_ART_DIFF_CAT_DEFAULT
-    end
-    -- For TAE ID 769 (Radahn's Rain), return 45 (Greatbow)
-    if artID == 169 then
+
+        -- For TAE ID 769 (Radahn's Rain), return 45 (Greatbow)
+    elseif artID == 169 then
         return WEAPON_CATEGORY_LARGE_ARROW
     end
 
     -- Allows some weapon categories to query for whether the Sword Art permits a cousin category.
     -- Only used to allow Claws to use Fist Sword Arts.
-    local wep_cat1 = wepCat
+    local wep_cat1
     if wepCat == WEAPON_CATEGORY_CLAW then
         wep_cat1 = WEAPON_CATEGORY_FIST
-    elseif wep_cat1 == WEAPON_CATEGORY_LIGHT_LARGE_SWORD then
-        return 0
     end
 
     -- Idle animation TAEs. Two-hand is ignored.
@@ -25293,10 +25243,6 @@ function GetSwordArtsDiffCategory(artID, idleCat, wepCat)
     -- Override for heavy thrusting swords (usually 3)
     if wepCat == WEAPON_CATEGORY_LARGE_RAPIER then
         idle_cat0 = SWORD_ART_DIFF_CAT_DEFAULT
-    end
-
-    if (artID == 90 or artID == 98 or artID == 151 or artID == 152) and env(GetEquipWeaponCategory, c_SwordArtsHand) == WEAPON_CATEGORY_DUELING_SHIELD and (c_Style == HAND_LEFT or c_Style == HAND_RIGHT) then
-        return 0
     end
 
     -- ivi: CASE 0: Not in table
@@ -25707,16 +25653,10 @@ function GetSwordArtsPutOppositeWeapon()
     if SwordArtPutOppositeWeapon[c_SwordArtsID] ~= nil then
         if c_Style == HAND_RIGHT then
             if HAND_RIGHT == c_SwordArtsHand then
-                if c_SwordArtsID == 276 and GetVariable("SwordArtsRollingDirection") == 3 then
-                    result = TRUE -- DLC special case
-                else
-                    result = SwordArtPutOppositeWeapon[c_SwordArtsID][1] -- Right hand, weapon art cast from right hand
-                end
+                result = SwordArtPutOppositeWeapon[c_SwordArtsID][1] -- Right hand, weapon art cast from right hand
             else
                 result = SwordArtPutOppositeWeapon[c_SwordArtsID][2] -- Right hand, weapon art cast from left hand
             end
-        elseif env(GetEquipWeaponCategory, c_SwordArtsHand) == WEAPON_CATEGORY_THROW_DAGGER or env(GetEquipWeaponCategory, c_SwordArtsHand) == WEAPON_CATEGORY_BACKHAND_SWORD then
-            result = SwordArtPutOppositeWeapon[c_SwordArtsID][1] -- DLC special case
         else
             result = SwordArtPutOppositeWeapon[c_SwordArtsID][3] -- Left hand
         end
@@ -25735,19 +25675,6 @@ function Contains(tab, val)
         end
     end
 
-    return FALSE
-end
-
-------------------------------------------
--- Core: Logic Expansion
-------------------------------------------
-function IsWeaponCatalyst(sp_kind)
-    local weaponCatalystSpKinds = {
-        293, -- Carian Sorcery Sword
-    }
-    if Contains(weaponCatalystSpKinds, sp_kind) == TRUE then
-    	return TRUE
-    end
     return FALSE
 end
 
@@ -25983,7 +25910,7 @@ IsObjActInterpolatedMotion = 322
 GetObjActTargetDirection = 323
 GetObjActRemainingInterpolateTime = 324
 IsGap = 325
-GetSwordArtID = 326 -- args: <hand index>
+GetWeaponID = 326 -- args: <hand index>
 IsMovingLaterally = 327
 IsNet = 328
 HasBrokenSA = 329
@@ -26268,7 +26195,7 @@ GetPoise1 = 4001
 GetPoise2 = 4002
 
 DebugLogOutput = 9000
-ClearSpEffect = 9001 -- args: <id>
+Test_SpEffectDelete = 9001
 Test_SpEffectTypeSpecifyDelete = 9002
 MarkerStart = 9003
 MarkerEnd = 9004
