@@ -18610,7 +18610,7 @@ function RideReActionFunction()
 end
 
 function ExecRideDeath()   -- NRL1 no ride death whatsoever
-    -- act(ChangeHP, 100)
+    act(ChangeHP, 100)
     return FALSE
 end
 

@@ -3,7 +3,7 @@
 -- Refined from decompiles by Vawser
 -- Curated at: https://github.com/ividyon/EldenRingHKS
 ------------------------------------------
--- Version 17 (For ER HKS last updated in 1.15.1)
+-- Version 14 (For ER HKS last updated in 1.13)
 ------------------------------------------
 -- Changelog:
 -- 2022-12-15 - AshenOne: ExecMagic (line 2090), moving an if block so left-hand casting works as intended
@@ -12,10 +12,10 @@
 -- 2023-01-27 - Massive overhaul and improvements by Vawser from Vigil
 --              Properly fixes Torrent dash as well as flick animation issues
 --              proper act/env naming instead of IDs, proper spacing, useful comments
--- 2023-01-27 - ivi: Minor oversight fixes
--- 2023-01-27 - ivi: Put on GitHub via philiquaz' initiative
--- 2023-02-14 - ivi: Minor comment changes
--- 2023-03-19 - ivi: Support for custom Ashes of War
+-- 2023-01-27 - Minor oversight fixes
+-- 2023-01-27 - Put on GitHub via philiquaz' initiative
+-- 2023-02-14 - Minor comment changes
+-- 2023-03-19 - Support for custom Ashes of War
 -- 2023-09-22 - Halvard: updated for 1.10
 --              - fixed the function declaration of "ExecComboMagic", it was missing two parameters.
 --              - removed an "act(SetAttackType, -1)" from the function "DamageBind_onUpdate()",
@@ -49,11 +49,7 @@
 --              - Renamed act Test_SpEffectDelete into ClearSpEffect and added a comment for it's args.
 --              - Added a new logic expansion section with a new function that allows for easy addition of new Weapon Catalysts.
 -- 2024-07-30 - Exelot: Updated to ER v1.13
--- 2024-08-29 - ivi: Fixed SwordArtsCategory table missing variations of existing arts for new weapon types
--- 2024-09-11 - Exelot: Updated to ER v1.14
--- 2024-10-02 - ivi: Updated to ER v1.15
--- 2024-10-03 - Exelot: Named almost all remaining acts and envs thanks to a list provided by ElaDiDu. Some of the existing ones have been renamed.
--- 2024-10-10 - ivi: Support for custom spells
+
 ------------------------------------------
 -- Known issues:
 -- N/A
@@ -217,7 +213,7 @@ function SetWeightIndex()
 end
 
 function SetAIActionState()
-    act(SetAIAttackState, env(GetNpcAIAttackRequestIDAfterBlend))
+    act(SetAIAttackState, env(Unknown405))
 end
 
 function SetAttackHand(hand)
@@ -1963,7 +1959,6 @@ function ExecAttack(r1, r2, l1, l2, b1, b2, is_guard, blend_type, artsr1, artsr2
 
         ExecEventAllBody(l1)
     elseif request == ATTACK_REQUEST_BOTH_HEAVY then
-        -- DLC 1.13.1: Dynastic Sickleplay, Raging Beast
         if (c_SwordArtsID == 313 or c_SwordArtsID == 273) and (r2 == "W_SwordArtsOneShotComboEnd" or r2 == "W_SwordArtsOneShotComboEnd_2") then
             artsr2 = TRUE
             SetVariable("SwordArtsOneShotComboCategory", 0)
@@ -2420,7 +2415,7 @@ function ExecAttack(r1, r2, l1, l2, b1, b2, is_guard, blend_type, artsr1, artsr2
                 if GetVariable("IsLockon") == true then
                     act(TurnToLockonTargetImmediately, turn_target_angle)
                 else
-                    act(FaceDirection, turn_target_angle)
+                    act(Unknown2029, turn_target_angle)
                 end
             end
         end
@@ -2444,7 +2439,7 @@ function ExecAttack(r1, r2, l1, l2, b1, b2, is_guard, blend_type, artsr1, artsr2
         SetVariable("TurnAngleReal", turn_angle_real)
         SetSwordArtsPointInfo(ACTION_ARM_L2, TRUE)
 
-        if env(GetSpEffectID, 102360) == FALSE and arts_id ~= 313 then
+        if env(GetSpEffectID, 102360) == FALSE then
             if GetVariable("IsEnoughArtPointsL2") == 1 then
                 AddStamina(STAMINA_REDUCE_ARTS_QUICKSTEP * STAMINA_CONSUMERATE_LOWSTATUS)
             else
@@ -2716,7 +2711,7 @@ function ExecAttack(r1, r2, l1, l2, b1, b2, is_guard, blend_type, artsr1, artsr2
         act(SetThrowPossibilityState_Defender, 400000)
     end
 
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -3019,7 +3014,7 @@ function IsUseStealthAttack(is_dual)
 
     if is_dual == TRUE then
         if GetEquipType(HAND_RIGHT, WEAPON_CATEGORY_STRAIGHT_SWORD, WEAPON_CATEGORY_TWINBLADE, WEAPON_CATEGORY_RAPIER,
-            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_SPEAR, WEAPON_CATEGORY_LARGE_SPEAR, WEAPON_CATEGORY_BACKHAND_SWORD) == TRUE then
+            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_SPEAR, WEAPON_CATEGORY_LARGE_SPEAR) == TRUE then
             return TRUE
         end
     elseif c_Style == HAND_RIGHT_BOTH or c_Style == HAND_LEFT_BOTH then
@@ -3040,7 +3035,7 @@ function IsUseStealthAttack(is_dual)
         end
         if GetEquipType(hand, WEAPON_CATEGORY_TORCH, WEAPON_CATEGORY_STRAIGHT_SWORD, WEAPON_CATEGORY_TWINBLADE,
             WEAPON_CATEGORY_EXTRALARGE_SWORD, WEAPON_CATEGORY_RAPIER, WEAPON_CATEGORY_LARGE_RAPIER,
-            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_BACKHAND_SWORD) == TRUE then
+            WEAPON_CATEGORY_CURVEDSWORD) == TRUE then
             return TRUE
         end
     else
@@ -3055,7 +3050,7 @@ function IsUseStealthAttack(is_dual)
         end
         if GetEquipType(hand, WEAPON_CATEGORY_TORCH, WEAPON_CATEGORY_STRAIGHT_SWORD, WEAPON_CATEGORY_TWINBLADE,
             WEAPON_CATEGORY_EXTRALARGE_SWORD, WEAPON_CATEGORY_RAPIER, WEAPON_CATEGORY_LARGE_RAPIER,
-            WEAPON_CATEGORY_CURVEDSWORD, WEAPON_CATEGORY_BACKHAND_SWORD) == TRUE then
+            WEAPON_CATEGORY_CURVEDSWORD) == TRUE then
             return TRUE
         end
     end
@@ -3068,8 +3063,8 @@ function ExecArtsStance(blend_type)
     end
     local arts_id = c_SwordArtsID
     local is_arrow = GetEquipType(c_SwordArtsHand, WEAPON_CATEGORY_ARROW, WEAPON_CATEGORY_SMALL_ARROW,
-        WEAPON_CATEGORY_LARGE_ARROW)
-    local is_crossbow = GetEquipType(HAND_LEFT, WEAPON_CATEGORY_CROSSBOW, WEAPON_CATEGORY_BALLISTA)
+        WEAPON_CATEGORY_LARGE_ARROW, WEAPON_CATEGORY_BALISTA)
+    local is_crossbow = GetEquipType(HAND_LEFT, WEAPON_CATEGORY_CROSSBOW)
 
     if c_Style == HAND_RIGHT and (is_arrow == TRUE or is_crossbow == TRUE) then
         return FALSE
@@ -3115,7 +3110,7 @@ function ExecArtsStance(blend_type)
         ExecEventHalfBlend(Event_DrawStanceRightStart, blend_type)
     end
 
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -3231,8 +3226,8 @@ function ExecMagic(quick_type, blend_type, is_ride)
         act(OpenMenuWhenUsingMagic, delayActRequestNo)
         return TRUE
     end
-    act(DecideMagicUse)
-    act(NotifyAIMagicCast)
+    act(Unknown2026)
+    act(MarkOfGreedyPersonSlipDamageDisable)
     local magic_index = env(GetMagicAnimType)
     g_MagicIndex = magic_index
     g_Magichand = wep_hand
@@ -3256,7 +3251,7 @@ function ExecMagic(quick_type, blend_type, is_ride)
             ExecEventHalfBlend(Event_MagicInvalid, blend_type)
         end
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
         return TRUE
     end
@@ -3270,7 +3265,7 @@ function ExecMagic(quick_type, blend_type, is_ride)
             ExecEventHalfBlend(Event_MagicInvalid, blend_type)
         end
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
         return TRUE
     end
@@ -3281,7 +3276,7 @@ function ExecMagic(quick_type, blend_type, is_ride)
         act(DebugLogOutput, "Event_MagicInvalid_Left")
         ExecEventHalfBlend(Event_MagicInvalid, blend_type)
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
         return TRUE
     end
@@ -3348,7 +3343,7 @@ function ExecMagic(quick_type, blend_type, is_ride)
     end
 
     act(SetIsMagicInUse, TRUE)
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -3604,7 +3599,7 @@ function ExecStealthItem(blend_type, item_type)
     end
 
     act(SetIsItemAnimationPlaying)
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -3897,7 +3892,7 @@ function ExecItem(quick_type, blend_type)
     end
 
     act(SetIsItemAnimationPlaying)
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -4069,7 +4064,7 @@ function ExecWeaponChange(blend_type)
     end
 
     ExecEventHalfBlend(event, blend_type)
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -4103,10 +4098,10 @@ end
 function ExecJump()
     -- Note: Restored original value during full remake. Repo values was ACTION_ARM_JUMP instead of ACTION_ARM_CHANGE_STYLE
     -- note: Original decompile of 1.10 has ACTION_ARM_CHANGE_STYLE instead of jump
-    if env(ActionRequest, ACTION_ARM_CHANGE_STYLE) == FALSE and env(IsAIJumpRequested) == FALSE then
+    if env(ActionRequest, ACTION_ARM_CHANGE_STYLE) == FALSE and env(Unknown700) == FALSE then
         return FALSE
     end
-    if env(GetStamina) <= 0 and env(IsAIJumpRequested) == FALSE then
+    if env(GetStamina) <= 0 and env(Unknown700) == FALSE then
         ResetRequest()
         return FALSE
     end
@@ -4117,7 +4112,7 @@ function ExecJump()
     SetWeightIndex()
 
     -- Jump: Overweight
-    if GetVariable("EvasionWeightIndex") == EVASION_WEIGHT_INDEX_OVERWEIGHT and env(IsAIJumpRequested) == FALSE then
+    if GetVariable("EvasionWeightIndex") == EVASION_WEIGHT_INDEX_OVERWEIGHT and env(Unknown700) == FALSE then
         local jumpangle = env(GetJumpAngle) * 0.009999999776482582
 
         if jumpangle > -45 and jumpangle < 45 then
@@ -4130,7 +4125,7 @@ function ExecJump()
             SetVariable("JumpOverweightIndex", 1)
         end
 
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
         ExecEventAllBody("W_Jump_Overweight")
 
@@ -4191,11 +4186,11 @@ function ExecJump()
     end
 
     if JumpMoveLevel == 2 then
-        if env(IsAIJumpRequested) == TRUE then
-            act(NotifyAIOfJumpState)
+        if env(Unknown700) == TRUE then
+            act(GetPoise1)
         end
 
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
         ExecEvent("W_Jump_D")
 
@@ -4229,17 +4224,17 @@ function ExecJump()
             if GetVariable("IsLockon") == true then
                 act(TurnToLockonTargetImmediately, turn_target_angle)
             else
-                act(FaceDirection, turn_target_angle)
+                act(Unknown2029, turn_target_angle)
             end
         end
 
         SetVariable("IsEnableDirectionJumpTAE", true)
 
-        if env(IsAIJumpRequested) == TRUE then
-            act(NotifyAIOfJumpState)
+        if env(Unknown700) == TRUE then
+            act(GetPoise1)
         end
 
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
         ExecEvent("W_Jump_F")
 
@@ -4247,11 +4242,11 @@ function ExecJump()
     else
         SetVariable("JumpReachSelector", 0)
 
-        if env(IsAIJumpRequested) == TRUE then
-            act(NotifyAIOfJumpState)
+        if env(Unknown700) == TRUE then
+            act(GetPoise1)
         end
 
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
         ExecEvent("W_Jump_N")
 
@@ -4432,7 +4427,7 @@ function ExecHandChange(hand, is_force, blend_type, no_reset)
     else
         ExecEventHalfBlend(event, blend_type)
     end
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
     return TRUE
 end
@@ -4609,7 +4604,7 @@ function ExecEvasion(backstep_limit, estep, is_usechainrecover)
             if GetVariable("IsLockon") == true then
                 act(TurnToLockonTargetImmediately, turn_target_angle)
             else
-                act(FaceDirection, turn_target_angle)
+                act(Unknown2029, turn_target_angle)
             end
 
             turn_angle_real = math.abs(GetVariable("TurnAngle") - c_RollingAngle)
@@ -4663,7 +4658,7 @@ function ExecEvasion(backstep_limit, estep, is_usechainrecover)
         SetVariable("ToggleDash", 0)
     end
 
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -5438,16 +5433,16 @@ function ExecDamage(is_parry, is_attackwhileguard)
 
     if env(GetSpEffectID, 89) == TRUE or env(GetSpEffectID, 100640) == TRUE then
         if damage_level == DAMAGE_LEVEL_EXLARGE then
-            act(RequestAIJumpInterupt)
+            act(GetPoise0)
         elseif damage_level == DAMAGE_LEVEL_LARGE or damage_level == DAMAGE_LEVEL_PUSH or damage_level
             == DAMAGE_LEVEL_FLING or damage_level == DAMAGE_LEVEL_SMALL_BLOW or damage_level == DAMAGE_LEVEL_UPPER
             or damage_level == DAMAGE_LEVEL_EX_BLAST or damage_level == DAMAGE_LEVEL_BREATH or env(GetIsWeakPoint)
             == TRUE then
-            act(RequestAIJumpInterupt)
+            act(GetPoise0)
             damage_level = DAMAGE_LEVEL_SMALL_BLOW
         elseif damage_level == DAMAGE_LEVEL_MIDDLE or damage_level == DAMAGE_LEVEL_SMALL then
             CalcDamageCount()
-            act(RequestAIJumpInterupt)
+            act(GetPoise0)
             hkbFireEvent("W_JumpDamage_Start")
             SetVariable("Int16Variable04", 0)
             act(SetDamageAnimType, 3)
@@ -5461,7 +5456,7 @@ function ExecDamage(is_parry, is_attackwhileguard)
     if env(IsFalling) == TRUE and env(GetBehaviorID, 10) == TRUE and height >= 10 then
         damage_level = DAMAGE_LEVEL_NONE
     end
-    if env(GetIsWeakPoint) == TRUE and env(GetBehaviorID, 15) == FALSE then
+    if env(GetIsWeakPoint) == TRUE then
         CalcDamageCount()
         SetVariable("DamageDirection", damage_angle)
         act(SetDamageAnimType, DAMAGE_FLAG_WEAK)
@@ -5625,7 +5620,7 @@ function FallCommonFunction(is_enable_falling_death, is_jump, fall_style)
         return TRUE
     end
 
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if env(IsLanding) == TRUE then
         IS_ATTACKED_JUMPMAGIC = FALSE
@@ -5841,7 +5836,7 @@ function ExecGuardOnCancelTiming(guardcondition, blend_type)
 end
 
 function LadderIdleCommonFunction(hand)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if ExecLadderDeath() == TRUE then
         return TRUE
@@ -5862,7 +5857,7 @@ function LadderIdleCommonFunction(hand)
 end
 
 function LadderMoveCommonFunction(hand, is_no_damage)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if ExecLadderDeath() == TRUE then
         return TRUE
@@ -5896,7 +5891,7 @@ function LadderMoveCommonFunction(hand, is_no_damage)
 end
 
 function LadderAttackCommonFunction(hand)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if ExecLadderDeath() == TRUE then
         return TRUE
@@ -5927,7 +5922,7 @@ function LadderAttackCommonFunction(hand)
 end
 
 function LadderDamageCommonFunction(hand)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if ExecLadderDeath() == TRUE then
         return TRUE
@@ -5957,7 +5952,7 @@ function LadderDamageCommonFunction(hand)
 end
 
 function LadderEndCommonFunction()
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if ExecLadderDeath() == TRUE then
         LadderSetActionState(LADDER_ACTION_INVALID)
@@ -6012,7 +6007,7 @@ end
 
 function LadderItemCommonFunction(hand, tonext)
     act(SetIsItemAnimationPlaying)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
     if ExecLadderDeath() == TRUE then
         return TRUE
     end
@@ -6308,7 +6303,7 @@ function ExecLadderAttack(hand)
 end
 
 function LadderCoastCommonFunction(hand, is_start)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if ExecLadderDeath() == TRUE then
         return TRUE
@@ -6353,7 +6348,7 @@ function IdleCommonFunction()
     end
 
     act(Wait)
-    act(AllowBuddyWarp)
+    act(Unknown2040)
     SetEnableAimMode()
 
     if ExecPassiveAction(FALSE, FALL_TYPE_DEFAULT, FALSE) == TRUE then
@@ -6444,7 +6439,7 @@ function AttackCommonFunction(r1, r2, l1, l2, b1, b2, guardcondition, use_atk_qu
 
     SetVariable("ToggleDash", 0)
 
-    act(FallPreventionAssist)
+    act(Unknown2027)
     SetThrowAtkInvalid()
     SetAIActionState()
 
@@ -6680,7 +6675,7 @@ function MagicCommonFunction(blend_type, quick_type, is_throw)
     end
 
     if GetVariable("MoveSpeedLevel") <= 0 then
-        act(FallPreventionAssist)
+        act(Unknown2027)
     end
 
     if is_throw ~= TRUE then
@@ -6936,8 +6931,8 @@ function DamageCommonFunction(guardcondition, estep, fall_type)
 end
 
 function QuickTurnCommonFunction()
-    act(SetCanChangeEquipmentOff)
-    act(AllowBuddyWarp)
+    act(Unknown163)
+    act(Unknown2040)
 
     if ExecPassiveAction(FALSE, FALL_TYPE_DEFAULT, FALSE) == TRUE then
         return TRUE
@@ -6977,7 +6972,7 @@ function QuickTurnCommonFunction()
 end
 
 function LandCommonFunction()
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if ExecPassiveAction(FALSE, FALL_TYPE_DEFAULT, FALSE) == TRUE then
         return TRUE
@@ -7017,7 +7012,6 @@ function LandCommonFunction()
 end
 
 function ItemCommonFunction(blend_type)
-    act(SetCanChangeEquipmentOff)
     if env(GetStateChangeType, 15) == FALSE then
         act(SetIsItemAnimationPlaying)
     end
@@ -7027,7 +7021,7 @@ function ItemCommonFunction(blend_type)
     end
 
     if GetVariable("MoveSpeedLevel") <= 0 then
-        act(FallPreventionAssist)
+        act(Unknown2027)
     end
 
     SetAIActionState()
@@ -7080,7 +7074,7 @@ function StealthItemCommonFunction(blend_type)
     end
 
     if GetVariable("MoveSpeedLevel") <= 0 then
-        act(FallPreventionAssist)
+        act(Unknown2027)
     end
 
     SetAIActionState()
@@ -7130,7 +7124,7 @@ function QuickItemCommonFunction(g_r1, g_r2, g_l1, g_l2, g_b1, g_b2, blend_type,
     act(SetIsItemAnimationPlaying)
 
     if GetVariable("MoveSpeedLevel") <= 0 then
-        act(FallPreventionAssist)
+        act(Unknown2027)
     end
 
     SetAIActionState()
@@ -7270,7 +7264,7 @@ end
 
 function MoveCommonFunction(blend_type)
     act(Wait)
-    act(AllowBuddyWarp)
+    act(Unknown2040)
     SetEnableAimMode()
 
     if ExecPassiveAction(FALSE, FALL_TYPE_DEFAULT, FALSE) == TRUE then
@@ -7454,7 +7448,7 @@ function ArtsCommonFunction(r1, r2, l1, l2, b1, b2, guardcondition, artsr1, arts
     end
 
     SetAIActionState()
-    act(SetCanChangeEquipmentOff)
+    act(Unknown163)
 
     if ExecPassiveAction(FALSE, FALL_TYPE_DEFAULT, FALSE) == TRUE then
         ClearAttackQueue()
@@ -7563,13 +7557,13 @@ function ArtsParryCommonFunction()
     return FALSE
 end
 
-function ArtsStanceCommonFunction(r1, r2, l1, l2, b1, b2, blend_type, turn_type, artsr1, artsr2, is_stance_end, enable_turn)
+function ArtsStanceCommonFunction(r1, r2, l1, l2, b1, b2, blend_type, turn_type, artsr1, artsr2, is_stance_end)
     if is_stance_end == FALSE then
         SetThrowAtkInvalid()
     end
 
     SetAIActionState()
-    act(SetCanChangeEquipmentOff)
+    act(Unknown163)
 
     if ExecPassiveAction(FALSE, FALL_TYPE_DEFAULT, FALSE) == TRUE then
         return TRUE
@@ -7602,7 +7596,7 @@ function ArtsStanceCommonFunction(r1, r2, l1, l2, b1, b2, blend_type, turn_type,
     if ExecAttack(r1, r2, l1, l2, b1, b2, FALSE, blend_type, artsr1, artsr2, FALSE) == TRUE then
         return TRUE
     end
-    if blend_type ~= UPPER and enable_turn and ExecQuickTurn(LOWER, turn_type) == TRUE then
+    if blend_type ~= UPPER and ExecQuickTurn(LOWER, turn_type) == TRUE then
         return TRUE
     end
     if MoveStartonCancelTiming(Event_Move, FALSE) == TRUE then
@@ -7810,7 +7804,7 @@ function EventCommonFunction()
         act(SetIsEventAnim)
     end
 
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
 
     if env(HasThrowRequest) == TRUE then
         return TRUE
@@ -8201,7 +8195,7 @@ function DefaultBackStep_onActivate()
 end
 
 function DefaultBackStep_onUpdate()
-    act(SetCanChangeEquipmentOff)
+    act(Unknown163)
     act(DisallowAdditiveTurning, TRUE)
 
     if EvasionCommonFunction(FALL_TYPE_DEFAULT, "W_AttackRightBackstep", "W_AttackRightHeavy1Start",
@@ -8216,7 +8210,7 @@ function DefaultBackStep_onDeactivate()
 end
 
 function BackStepGuardOn_UpperLayer_onUpdate()
-    act(SetCanChangeEquipmentOff)
+    act(Unknown163)
     if ExecGuardOnCancelTiming(TO_GUARDON, ALLBODY) == TRUE then
         return
     end
@@ -8228,7 +8222,7 @@ function BackStepGuardOn_UpperLayer_onUpdate()
 end
 
 function BackStepGuardEnd_UpperLayer_onUpdate()
-    act(SetCanChangeEquipmentOff)
+    act(Unknown163)
     if env(IsAnimEnd, 1) == TRUE or env(GetEventEzStateFlag, 0) == TRUE then
         ExecEventSyncNoReset("Event_BackStepGuardOut")
     end
@@ -8965,7 +8959,7 @@ function GuardBreakRight_onUpdate()
 end
 
 function Repelled_Wall_onUpdate()
-    act(FallPreventionAssist)
+    act(Unknown2027)
 
     if DamageCommonFunction(FALSE, ESTEP_NONE, FALL_TYPE_DEFAULT) == TRUE then
         return
@@ -11497,12 +11491,8 @@ function DrawStanceRightStart_Upper_onUpdate()
         b1 = "W_SwordArtsStanceAttackLight180"
         b2 = "W_SwordArtsStanceAttackHeavy180"
     end
-    local enable_turn = TRUE
-    if c_SwordArtsID == 309 then
-        enable_turn = FALSE
-    end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type,
-        TURN_TYPE_STANCE, TRUE, TRUE, FALSE, enable_turn) == TRUE then
+        TURN_TYPE_STANCE, TRUE, TRUE, FALSE) == TRUE then
         return
     end
 
@@ -11583,7 +11573,7 @@ function DrawStanceRightLoop_Upper_onUpdate()
         b2 = "W_SwordArtsStanceAttackHeavy180"
     end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type,
-        TURN_TYPE_STANCE, TRUE, TRUE, FALSE, TRUE) == TRUE then
+        TURN_TYPE_STANCE, TRUE, TRUE, FALSE) == TRUE then
         return
     end
 
@@ -11647,7 +11637,7 @@ function DrawStanceNoSyncLoop_Upper_onUpdate()
         b2 = "W_SwordArtsStanceAttackHeavy180"
     end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type,
-        TURN_TYPE_STANCE, TRUE, TRUE, FALSE, FALSE) == TRUE then
+        TURN_TYPE_STANCE, TRUE, TRUE, FALSE) == TRUE then
         return
     end
 
@@ -11695,7 +11685,7 @@ function DrawStanceNoSyncLoopMax_Upper_onUpdate()
         b2 = "W_DrawStanceRightAttackMaxHeavyL90"
     end
     if ArtsStanceCommonFunction(r1, r2, "W_AttackLeftLight1", "W_AttackLeftHeavy1", b1, b2, blend_type, TRUE, TRUE,
-        FALSE, FALSE) == TRUE then
+        FALSE) == TRUE then
         return
     end
 
@@ -11731,13 +11721,9 @@ function DrawStanceRightEnd_Upper_onUpdate()
             return
         end
     end
-    local enable_turn = TRUE
-    if c_SwordArtsID == 309 then
-        enable_turn = FALSE
-    end
-    if ArtsStanceCommonFunction("W_AttackRightLight1", "W_AttackRightHeavy1Start", "W_AttackLeftLight1", "W_AttackLeftHeavy1",
-        "W_AttackBothLight1", "W_AttackBothHeavy1Start", blend_type,
-        TURN_TYPE_DEFAULT, FALSE, FALSE, TRUE, enable_turn) == TRUE then
+    if ArtsStanceCommonFunction("W_AttackRightLight1", "W_AttackRightHeavy1Start", "W_AttackLeftLight1",
+        "W_AttackLeftHeavy1", "W_AttackBothLight1", "W_AttackBothHeavy1Start", blend_type, TURN_TYPE_DEFAULT, FALSE,
+        FALSE, TRUE) == TRUE then
         return
     end
     if HalfBlendUpperCommonFunction(lower_state) == TRUE then
@@ -13972,63 +13958,19 @@ function QuickItemEnchantDash_Upper_onUpdate()
 end
 
 function QuickItemEnchantStep_Upper_onUpdate()
-    local blend_type, lower_state = GetHalfBlendInfo()
-    
-    if QuickItemCommonFunction(g_r1, g_r2, g_l1, g_l2, g_b1, g_b2, blend_type, QUICKTYPE_NORMAL) == TRUE then
-        return
-    end
-
-    if blend_type ~= UPPER and ExecQuickTurn(LOWER, TURN_TYPE_DEFAULT) == TRUE then
-        return TRUE
-    end
-    if HalfBlendUpperCommonFunction(lower_state) == TRUE then
-        ClearAttackQueue()
-        return
-    end
-    
-    if HalfBlendLowerCommonFunction(Event_QuickItemEnchantStep, lower_state, FALSE, TRUE) == TRUE then
+    if QuickItemCommonFunction(g_r1, g_r2, g_l1, g_l2, g_b1, g_b2, ALLBODY, QUICKTYPE_NORMAL) == TRUE then
         return
     end
 end
 
 function QuickItemEnchantAttackRight_Upper_onUpdate()
-    local blend_type, lower_state = GetHalfBlendInfo()
-
-    if QuickItemCommonFunction(g_r1, g_r2, g_l1, g_l2, g_b1, g_b2, blend_type, QUICKTYPE_NORMAL) == TRUE then
+    if QuickItemCommonFunction(g_r1, g_r2, g_l1, g_l2, g_b1, g_b2, ALLBODY, QUICKTYPE_NORMAL) == TRUE then
         return
     end
-
-    if blend_type ~= UPPER and ExecQuickTurn(LOWER, TURN_TYPE_DEFAULT) == TRUE then
-        return TRUE
-    end
-
-    if HalfBlendUpperCommonFunction(lower_state) == TRUE then
-        ClearAttackQueue()
-        return
-    end
-
-    if HalfBlendLowerCommonFunction(Event_QuickItemEnchantAttackRight, lower_state, FALSE, TRUE) == TRUE then
-        return
-    end 
 end
 
 function QuickItemEnchantAttackLeft_Upper_onUpdate()
-    local blend_type, lower_state = GetHalfBlendInfo()
-
-    if QuickItemCommonFunction(g_r1, g_r2, g_l1, g_l2, g_b1, g_b2, blend_type, QUICKTYPE_NORMAL) == TRUE then
-        return
-    end
-
-    if blend_type ~= UPPER and ExecQuickTurn(LOWER, TURN_TYPE_DEFAULT) == TRUE then
-        return TRUE
-    end
-
-    if HalfBlendUpperCommonFunction(lower_state) == TRUE then
-        ClearAttackQueue()
-        return
-    end
-
-    if HalfBlendLowerCommonFunction(Event_QuickItemEnchantAttackLeft, lower_state, FALSE, TRUE) == TRUE then
+    if QuickItemCommonFunction(g_r1, g_r2, g_l1, g_l2, g_b1, g_b2, ALLBODY, QUICKTYPE_NORMAL) == TRUE then
         return
     end
 end
@@ -14287,7 +14229,7 @@ function ItemPray_Upper_onUpdate()
             return TRUE
         end
     elseif env(IsSummoningRide) == TRUE then
-        if env(IsNewRidingTest) == TRUE then
+        if env(Unknown552) == TRUE then
             SetVariable("RideOnSummonTest", 1)
             FireRideEvent("W_RideOn", "W_RideOn", FALSE)
         else
@@ -14296,7 +14238,7 @@ function ItemPray_Upper_onUpdate()
         end
         return TRUE
     elseif env(GetEventEzStateFlag, 0) == TRUE then
-        act(Mounting)
+        act(Unknown3000)
         return TRUE
     end
     if HalfBlendUpperCommonFunction(lower_state) == TRUE then
@@ -14938,11 +14880,11 @@ function ItemDash_Upper_onUpdate()
     end
     if env(IsSummoningRide) == TRUE then
         act(DebugLogOutput, "SummonHorse SummonRequest true")
-        if env(IsNewRidingTest) == TRUE and IsSummonDash == TRUE then
+        if env(Unknown552) == TRUE and IsSummonDash == TRUE then
             act(DebugLogOutput, "SummonHorse RideOnDash")
             SetVariable("RideOnSummonTest", 2)
             FireRideEvent("W_RideOn", "W_RideOnDash", FALSE)
-        elseif env(IsNewRidingTest) == TRUE then
+        elseif env(Unknown552) == TRUE then
             act(DebugLogOutput, "SummonHorse RideOn")
             SetVariable("RideOnSummonTest", 1)
             FireRideEvent("W_RideOn", "W_RideOn", FALSE)
@@ -14959,7 +14901,7 @@ function ItemDash_Upper_onUpdate()
         if env(IsAnimEnd, 1) == TRUE then
             ExecEventAllBody("W_Idle")
         end
-        act(Mounting)
+        act(Unknown3000)
         return
     end
     if HalfBlendUpperCommonFunction(lower_state) == TRUE then
@@ -15316,7 +15258,7 @@ function MagicLaunchRight_Upper_onUpdate()
 end
 
 function MagicLoopRight_Upper_onUpdate()
-    act(NotifyAIOfBehaviourState, IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE_CHARGEMAGIC)
+    act(Unknown2050, IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE_CHARGEMAGIC)
     local blend_type, lower_state = GetHalfBlendInfo()
     if MagicCommonFunction(blend_type, QUICKTYPE_NORMAL, FALSE) == TRUE then
         return
@@ -15440,7 +15382,7 @@ function MagicLaunchLeft_Upper_onUpdate()
 end
 
 function MagicLoopLeft_Upper_onUpdate()
-    act(NotifyAIOfBehaviourState, IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE_CHARGEMAGIC)
+    act(Unknown2050, IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE_CHARGEMAGIC)
     local blend_type, lower_state = GetHalfBlendInfo()
     if MagicCommonFunction(blend_type, QUICKTYPE_NORMAL, FALSE) == TRUE then
         return
@@ -17724,7 +17666,7 @@ end
 
 function Ladder_Activate()
     act(ClearSlopeInfo)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
     Flag_LadderDamage = LADDER_DAMAGE_NONE
     Flag_LadderJump = LADDER_JUMP_INVALID
     SetThrowInvalid()
@@ -18023,7 +17965,7 @@ end
 
 function LadderDrop_onUpdate()
     act(SetMovementScaleMult, math.random(160, 200) / 100)
-    act(SetCanChangeEquipmentOn)
+    act(SetIsEquipmentChangeableFromMenu)
     if env(IsFalling) == TRUE then
         ExecEventAllBody("W_FallLoop")
         return
@@ -18350,31 +18292,18 @@ function Update()
         end
     end
 
-    -- Euporia
-    local isChangingWeaponRight = FALSE
-    local isChangingWeaponLeft = FALSE
-    if IsNodeActive("WeaponChangeStart_Selector00") == TRUE or IsNodeActive("WeaponChangeEnd_Selector00") == TRUE or
-        IsNodeActive("WeaponChangeStart_Selector01") == TRUE or IsNodeActive("WeaponChangeEnd_Selector01") == TRUE or
-        IsNodeActive("RideWeaponChangeStart_Selector") == TRUE or IsNodeActive("RideWeaponChangeEnd_Selector") == TRUE then
-
-        if GetVariable("WeaponChangeType") <= WEAPON_CHANGE_REQUEST_RIGHT_SPEAR and GetVariable("WeaponChangeType") ~= WEAPON_CHANGE_REQUEST_INVALID then
-            isChangingWeaponRight = TRUE
-        else
-            isChangingWeaponLeft = TRUE
-        end
-    end
     if env(GetSpEffectID, 19875) == TRUE then
-        if isChangingWeaponLeft == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_LEFT_BOTH) and env(GetSwordArtID, HAND_LEFT) == 328 then
+        if env(GetSwordArtID, HAND_LEFT) == 328 then
             act(AddSpEffect, 19887)
         end
-        if isChangingWeaponRight == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_RIGHT_BOTH) and env(GetSwordArtID, HAND_RIGHT) == 328 then
+        if env(GetSwordArtID, HAND_RIGHT) == 328 then
             act(AddSpEffect, 19883)
         end
     elseif env(GetSpEffectID, 19874) == TRUE then
-        if isChangingWeaponLeft == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_LEFT_BOTH) and env(GetSwordArtID, HAND_LEFT) == 328 then
+        if env(GetSwordArtID, HAND_LEFT) == 328 then
             act(AddSpEffect, 19885)
         end
-        if isChangingWeaponRight == FALSE and (c_Style == HAND_RIGHT or c_Style == HAND_RIGHT_BOTH) and env(GetSwordArtID, HAND_RIGHT) == 328 then
+        if env(GetSwordArtID, HAND_RIGHT) == 328 then
             act(AddSpEffect, 19881)
         end
     end
@@ -18438,7 +18367,7 @@ end
 
 function Ride_Deactivate()
     if IsNodeActive("Jump_RideOff LayerGenerator") == FALSE then
-        act(Dismount)
+        act(Unknown3005)
     end
 end
 
@@ -18465,7 +18394,7 @@ function ExecRide()
         FireRideEvent("W_RideOn", "W_RideOn", FALSE)
         return TRUE
     elseif env(ActionRequest, ACTION_ARM_RIDEON) == TRUE then
-        act(Mounting)
+        act(Unknown3000)
         return TRUE
     end
     return FALSE
@@ -18574,11 +18503,11 @@ end
 function RideReActionFunction()
     local isEnableForceRideOff = FALSE
 
-    if env(IsAutomaticTesting) == TRUE then
-        if env(InNoRidingArea) == TRUE and env(IsRidingPcMount) == TRUE and env(IsMountInFallLoop) == TRUE then
+    if env(Unknown368) == TRUE then
+        if env(Unknown548) == TRUE and env(Unknown555) == TRUE and env(IsMountInFallLoop) == TRUE then
             isEnableForceRideOff = TRUE
         end
-    elseif (env(InNoRidingArea) == TRUE or env(IsMultiplayer) == TRUE or env(GetSpEffectType, 433) == TRUE) and env(IsRidingPcMount)
+    elseif (env(Unknown548) == TRUE or env(Unknown365) == TRUE or env(GetSpEffectType, 433) == TRUE) and env(Unknown555)
         == TRUE and env(IsMountInFallLoop) == TRUE then
         isEnableForceRideOff = TRUE
     end
@@ -18885,7 +18814,7 @@ end
 
 function RideRequestFunction(ride_move_type, enable_turn, lower_only)
     if env(IsOnMount) == FALSE then
-        act(Dismount)
+        act(Unknown3005)
         ExecEventAllBody("W_Idle")
 
         return TRUE
@@ -19217,7 +19146,7 @@ function ExecRideItem()
 
     act(ApplyRideBlend, "Ride_Feed_AddBlend", 0)
     act(SetIsItemAnimationPlaying)
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -19301,7 +19230,7 @@ function ExecRideWeaponChange(blend_type)
     SetVariable("WeaponChangeType", startkind)
     SetVariable("RideWeaponChangeEndType", endKind)
     ExecEventAllBody("W_RideWeaponChangeStart")
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
     return TRUE
 end
@@ -19409,7 +19338,7 @@ function ExecRideHandChange(hand, is_force)
     end
 
     ExecEventAllBody("W_RideHandChangeStart")
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     SetAIActionState()
 
     return TRUE
@@ -19417,7 +19346,7 @@ end
 
 function RideWeaponChangeStart_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -19445,7 +19374,7 @@ end
 
 function RideWeaponChangeEnd_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -19482,7 +19411,7 @@ end
 
 function RideHandChangeStart_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -19512,7 +19441,7 @@ end
 
 function RideHandChangeEnd_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -19892,7 +19821,7 @@ end
 
 function RideItemDrinkStart_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -19941,7 +19870,7 @@ end
 
 function RideItemDrinking_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -19979,7 +19908,7 @@ end
 
 function RideItemDrinkEnd_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20013,7 +19942,7 @@ end
 
 function RideItemDrinkEmpty_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20050,7 +19979,7 @@ end
 
 function RideItemInvalid_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20086,7 +20015,7 @@ end
 
 function RideItemDrinkNothing_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20123,7 +20052,7 @@ end
 
 function RideItemWhistle_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20160,7 +20089,7 @@ end
 
 function RideItemElixir_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20197,7 +20126,7 @@ end
 
 function RideItemHorn_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20234,7 +20163,7 @@ end
 
 function RideItemQuick1_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20270,7 +20199,7 @@ end
 
 function RideItemQuick2_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20307,7 +20236,7 @@ end
 
 function RideItemQuick3_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20344,7 +20273,7 @@ end
 
 function RideItemOneShot_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20397,7 +20326,7 @@ end
 
 function RideItemDragonThrowSpearCancel_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20435,7 +20364,7 @@ end
 
 function RideItemLanternOff_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20472,7 +20401,7 @@ end
 
 function RideItemCombo_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -20713,11 +20642,11 @@ function RideOff_onUpdate()
 
     if EvasionCommonFunction(FALL_TYPE_DEFAULT, "W_AttackRightLight1", "W_AttackRightHeavy1Start", "W_AttackLeftLight1",
         "W_AttackLeftHeavy1", "W_AttackBothLight1", "W_AttackBothHeavy1Start", QUICKTYPE_NORMAL) == TRUE then
-        act(Dismount)
+        act(Unknown3005)
         return
     end
     if env(MovementRequest) == TRUE or env(IsAnimEnd, 0) == TRUE then
-        act(Dismount)
+        act(Unknown3005)
         ExecEventAllBody("W_Idle")
         return TRUE
     end
@@ -21080,7 +21009,7 @@ function RideDamage_Fall_onUpdate()
     act(SetAllowedThrowAttackType, 1)
     SetAIActionState()
     SetVariable("Int16Variable01", 0)
-    act(Dismount)
+    act(Unknown3005)
 
     if DamageCommonFunction(FALSE, ESTEP_NONE, FALL_TYPE_FORCE) == TRUE then
         return TRUE
@@ -21108,7 +21037,7 @@ function RideDamage_Fall_AbyssalForest_onUpdate()
 end
 
 function RideDamage_Fall_AbyssalForest_onDeactivate()
-    act(Dismount)
+    act(Unknown3005)
 end
 
 function RideDamageMad_onUpdate()
@@ -21123,7 +21052,7 @@ function RideDamageMad_onUpdate()
         return
     end
 
-    act(Dismount)
+    act(Unknown3005)
 
     if DamageCommonFunction(FALSE, ESTEP_NONE, FALL_TYPE_FORCE) == TRUE then
         return TRUE
@@ -21140,7 +21069,7 @@ function RideDamageBind_Start_onUpdate()
     act(SetAllowedThrowAttackType, 1)
     SetAIActionState()
     SetVariable("Int16Variable01", 0)
-    act(Dismount)
+    act(Unknown3005)
 
     if DamageCommonFunction(FALSE, ESTEP_NONE, FALL_TYPE_FORCE) == TRUE then
         return TRUE
@@ -21157,7 +21086,7 @@ function RideDamageBind_Loop_onUpdate()
     act(SetAllowedThrowAttackType, 1)
     SetAIActionState()
     SetVariable("Int16Variable01", 0)
-    act(Dismount)
+    act(Unknown3005)
     if DamageCommonFunction(FALSE, ESTEP_NONE, FALL_TYPE_FORCE) == TRUE then
         return TRUE
     end
@@ -21172,7 +21101,7 @@ function RideDamageBind_End_onUpdate()
     act(SetAllowedThrowAttackType, 1)
     SetAIActionState()
     SetVariable("Int16Variable01", 0)
-    act(Dismount)
+    act(Unknown3005)
     if DamageCommonFunction(FALSE, ESTEP_NONE, FALL_TYPE_FORCE) == TRUE then
         return TRUE
     end
@@ -21388,7 +21317,7 @@ end
 
 function RideAttack_BackKick_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -21416,7 +21345,7 @@ end
 
 function RideAttack_R_Top_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -21448,7 +21377,7 @@ end
 
 function RideAttack_R_Top02_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -21480,7 +21409,7 @@ end
 
 function RideAttack_R_Top03_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -21512,7 +21441,7 @@ end
 
 function RideAttack_R_Hard1_Start_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
     SetVariable("RideAttack_JumpCondition", 0)
 end
@@ -21614,7 +21543,7 @@ end
 
 function RideAttack_R_Hard2_Start_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
     SetVariable("RideAttack_JumpCondition", 0)
 end
@@ -21706,7 +21635,7 @@ end
 
 function RideAttack_L_Hard1_Start_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
     SetVariable("RideAttack_JumpCondition", 0)
 end
@@ -21806,7 +21735,7 @@ end
 
 function RideAttack_L_Hard2_Start_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
     SetVariable("RideAttack_JumpCondition", 0)
 end
@@ -21900,7 +21829,7 @@ end
 
 function RideAttack_L_Top_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -21933,7 +21862,7 @@ end
 
 function RideAttack_L_Top02_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -21966,7 +21895,7 @@ end
 
 function RideAttack_L_Top03_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
     act(ResetInputQueue)
 end
 
@@ -22440,7 +22369,7 @@ end
 
 function RideJump_N_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_N_onUpdate()
@@ -22451,7 +22380,7 @@ end
 
 function RideJump_F_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_F_onUpdate()
@@ -22462,7 +22391,7 @@ end
 
 function RideJump_D_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_D_onUpdate()
@@ -22473,7 +22402,7 @@ end
 
 function RideJump_Loop_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_Loop_onUpdate()
@@ -22496,7 +22425,7 @@ end
 
 function RideJump2_N_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump2_N_onUpdate()
@@ -22507,7 +22436,7 @@ end
 
 function RideJump2_F_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump2_F_onUpdate()
@@ -22518,7 +22447,7 @@ end
 
 function RideJump2_D_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump2_D_onUpdate()
@@ -22529,7 +22458,7 @@ end
 
 function RideJump2_Loop_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump2_Loop_onUpdate()
@@ -22552,7 +22481,7 @@ end
 
 function RideJump_Land_N_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_Land_N_onUpdate()
@@ -22576,7 +22505,7 @@ end
 
 function RideJump_Land_F_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_Land_F_onUpdate()
@@ -22597,7 +22526,7 @@ end
 
 function RideJump_Land_D_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_Land_D_onUpdate()
@@ -22618,7 +22547,7 @@ end
 
 function RideJump_Land_To_Dash_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_Land_To_Dash_onUpdate()
@@ -22637,7 +22566,7 @@ end
 
 function RideJump_Land_To_Gallop_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_Land_To_Gallop_onUpdate()
@@ -22656,7 +22585,7 @@ end
 
 function RideJumpHigh_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJumpHigh_onUpdate()
@@ -22680,7 +22609,7 @@ end
 
 function RideJumpHighLoop_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJumpHighLoop_onUpdate()
@@ -22717,7 +22646,7 @@ end
 
 function RideJumpHighEnd_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJumpHighEnd_onUpdate()
@@ -22734,7 +22663,7 @@ end
 
 function RideJumpHigh2_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJumpHigh2_onUpdate()
@@ -22746,7 +22675,7 @@ end
 
 function RideJumpHigh_FallLoop_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJumpHigh_FallLoop_onUpdate()
@@ -22758,7 +22687,7 @@ end
 
 function RideJump_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideJump_onUpdate()
@@ -22825,7 +22754,7 @@ end
 
 function RideAttack_Jump_R_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideAttack_Jump_R_onUpdate()
@@ -22868,7 +22797,7 @@ end
 
 function RideAttack_Jump_R_Hard1_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideAttack_Jump_R_Hard1_onUpdate()
@@ -22909,7 +22838,7 @@ end
 
 function RideAttack_Jump_R_Hard2_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideAttack_Jump_R_Hard2_onUpdate()
@@ -22947,7 +22876,7 @@ end
 
 function RideAttack_Jump_L_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideAttack_Jump_L_onUpdate()
@@ -22986,7 +22915,7 @@ end
 
 function RideAttack_Jump_L_Hard1_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideAttack_Jump_L_Hard1_onUpdate()
@@ -23027,7 +22956,7 @@ end
 
 function RideAttack_Jump_L_Hard2_onActivate()
     SetAIActionState()
-    act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+    act(Unknown2025, env(Unknown404))
 end
 
 function RideAttack_Jump_L_Hard2_onUpdate()
@@ -23415,12 +23344,12 @@ end
 
 function JumpAttack_Start_Falling_onActivate()
     act(ResetInputQueue)
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 end
 
 function JumpAttack_Start_Falling_onUpdate()
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 
     if Act_Jump() == TRUE then
@@ -23465,12 +23394,12 @@ end
 
 function JumpAttack_Start_Falling_F_onActivate()
     act(ResetInputQueue)
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 end
 
 function JumpAttack_Start_Falling_F_onUpdate()
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 
     if Act_Jump() == TRUE then
@@ -23507,12 +23436,12 @@ end
 
 function JumpAttack_Start_Falling_D_onActivate()
     act(ResetInputQueue)
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 end
 
 function JumpAttack_Start_Falling_D_onUpdate()
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 
     if Act_Jump() == TRUE then
@@ -23548,10 +23477,10 @@ function JumpAttack_Start_Falling_D_onUpdate()
 end
 
 function JumpCommonFunction(jump_type)
-    act(AIJumpState)
+    act(GetPoise2)
 
     if GetVariable("JumpAttackForm") == 0 then
-        act(NotifyAIOfBehaviourState, IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE_JUMP_NONATTACK)
+        act(Unknown2050, IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE_JUMP_NONATTACK)
     elseif env(GetSpEffectID, 102050) == TRUE then
         act(LockonFixedAngleCancel)
     end
@@ -23626,7 +23555,7 @@ function JumpCommonFunction(jump_type)
             SetVariable("JumpAttackFormRequest", 0)
             SetVariable("JumpAttackForm", 1)
             SetInterruptType(INTERRUPT_FINDATTACK)
-            act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+            act(Unknown2025, env(Unknown404))
             SetAIActionState()
 
             return TRUE
@@ -23635,7 +23564,7 @@ function JumpCommonFunction(jump_type)
             SetVariable("JumpAttackFormRequest", 1)
             SetVariable("JumpAttackForm", 2)
             SetInterruptType(INTERRUPT_FINDATTACK)
-            act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+            act(Unknown2025, env(Unknown404))
             SetAIActionState()
 
             return TRUE
@@ -23644,7 +23573,7 @@ function JumpCommonFunction(jump_type)
             SetVariable("JumpAttackFormRequest", 2)
             SetVariable("JumpAttackForm", 3)
             SetInterruptType(INTERRUPT_FINDATTACK)
-            act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+            act(Unknown2025, env(Unknown404))
             SetAIActionState()
 
             return TRUE
@@ -23669,7 +23598,7 @@ function JumpCommonFunction(jump_type)
         if env(ActionRequest, ACTION_ARM_R1) == TRUE or is_arrow == TRUE and env(ActionRequest, ACTION_ARM_R2) == TRUE then
             SetVariable("JumpAttackFormRequest", 0)
             SetInterruptType(INTERRUPT_FINDATTACK)
-            act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+            act(Unknown2025, env(Unknown404))
             SetAIActionState()
 
             if jump_type == 0 then
@@ -23684,7 +23613,7 @@ function JumpCommonFunction(jump_type)
         elseif env(ActionRequest, ACTION_ARM_R2) == TRUE then
             SetVariable("JumpAttackFormRequest", 1)
             SetInterruptType(INTERRUPT_FINDATTACK)
-            act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+            act(Unknown2025, env(Unknown404))
             SetAIActionState()
             if jump_type == 0 then
                 ExecEventNoReset("W_JumpAttack_Start_Falling")
@@ -23697,7 +23626,7 @@ function JumpCommonFunction(jump_type)
             return TRUE
         elseif env(ActionRequest, ACTION_ARM_L1) == TRUE and IsEnableDualWielding() == HAND_RIGHT then
             SetInterruptType(INTERRUPT_FINDATTACK)
-            act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+            act(Unknown2025, env(Unknown404))
             SetAIActionState()
             SetVariable("JumpAttackFormRequest", 2)
             if jump_type == 0 then
@@ -23713,7 +23642,7 @@ function JumpCommonFunction(jump_type)
     end
     -- Landing
     if env(GetSpEffectID, 98) == TRUE and env(IsTruelyLanding) == TRUE and env(GetSpEffectID, 140) == FALSE
-        and env(IsAIJumping) == FALSE then
+        and env(Unknown701) == FALSE then
         local landIndex = GetLandIndex(height, FALSE)
         SetVariable("LandIndex", landIndex)
 
@@ -23868,8 +23797,8 @@ function ExecJumpMagic(jump_type)
         return FALSE
     end
 
-    act(DecideMagicUse)
-    act(NotifyAIMagicCast)
+    act(Unknown2026)
+    act(MarkOfGreedyPersonSlipDamageDisable)
 
     if IsJumpMagic() == FALSE and IsQuickMagic() == FALSE then
         ResetRequest()
@@ -23904,7 +23833,7 @@ function ExecJumpMagic(jump_type)
 
         IS_ATTACKED_JUMPMAGIC = TRUE
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
 
         return TRUE
@@ -23920,7 +23849,7 @@ function ExecJumpMagic(jump_type)
         end
 
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
 
         return TRUE
@@ -23945,7 +23874,7 @@ function ExecJumpMagic(jump_type)
         end
 
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
 
         return TRUE
@@ -24045,8 +23974,8 @@ function ExecFallMagic()
         return FALSE
     end
 
-    act(DecideMagicUse)
-    act(NotifyAIMagicCast)
+    act(Unknown2026)
+    act(MarkOfGreedyPersonSlipDamageDisable)
 
     if IsJumpMagic() == FALSE and IsQuickMagic() == FALSE then
         ResetRequest()
@@ -24081,7 +24010,7 @@ function ExecFallMagic()
 
         IS_ATTACKED_JUMPMAGIC = TRUE
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
 
         return TRUE
@@ -24099,7 +24028,7 @@ function ExecFallMagic()
 
         ExecEventNoReset("W_JumpAttack_Start_Falling")
         act(SetIsMagicInUse, TRUE)
-        act(SetNpcAIAttackRequestIDAfterBlend, env(GetNpcAIAttackRequestID))
+        act(Unknown2025, env(Unknown404))
         SetAIActionState()
 
         return TRUE
@@ -24124,7 +24053,7 @@ function Jump_Overweight_onDeactivate()
 end
 
 function Jump_N_onActivate()
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 end
 
@@ -24163,7 +24092,7 @@ function Jump_N_onDeactivate()
 end
 
 function Jump_F_onActivate()
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 end
 
@@ -24190,7 +24119,7 @@ function Jump_F_onDeactivate()
 end
 
 function Jump_D_onActivate()
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 end
 
@@ -24214,7 +24143,7 @@ function Jump_D_onDeactivate()
 end
 
 function Jump_RideOff_onActivate()
-    act(AIJumpState)
+    act(GetPoise2)
     SetAIActionState()
 end
 
@@ -24229,13 +24158,13 @@ function Jump_RideOff_onUpdate()
     end
 
     if JumpCommonFunction(2) == TRUE then
-        act(Dismount)
+        act(Unknown3005)
         return
     end
 end
 
 function Jump_RideOff_onDeactivate()
-    act(Dismount)
+    act(Unknown3005)
     act(DisallowAdditiveTurning, FALSE)
 end
 
@@ -25154,16 +25083,16 @@ SWORD_ART_DIFF_CAT_POLEARM_LARGE_SHIELD = 9
 -- 20-59: Weapon Category
 SwordArtsCategory = {
     [0] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [1] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_FIST, WEAPON_CATEGORY_DUELING_SHIELD},
-    [2] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [1] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_FIST},
+    [2] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [3] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM,
-           WEAPON_CATEGORY_TWINBLADE, WEAPON_CATEGORY_BACKHAND_SWORD},
+           WEAPON_CATEGORY_TWINBLADE},
     [4] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
-    [5] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [5] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [6] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [7] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
-    [8] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_DUELING_SHIELD},
-    [9] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_DUELING_SHIELD},
+    [8] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
+    [9] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
     [10] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [11] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [12] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
@@ -25173,28 +25102,28 @@ SwordArtsCategory = {
     [16] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [17] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [18] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM},
-    [19] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD},
+    [19] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [20] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [21] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [22] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_TWINBLADE},
     [23] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM, WEAPON_CATEGORY_TWINBLADE},
     [24] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM,
-            WEAPON_CATEGORY_TWINBLADE, WEAPON_CATEGORY_BACKHAND_SWORD},
+            WEAPON_CATEGORY_TWINBLADE},
     [25] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [50] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [50] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [51] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [52] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_TWINBLADE},
-    [53] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [53] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [54] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, WEAPON_CATEGORY_TWINBLADE},
     [55] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [56] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [57] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON},
-    [58] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD, WEAPON_CATEGORY_DUELING_SHIELD},
+    [58] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [59] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [61] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [62] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [63] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD},
-    [64] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_FIST, WEAPON_CATEGORY_MARTIAL_ARTS, WEAPON_CATEGORY_DUELING_SHIELD, WEAPON_CATEGORY_BEAST_CLAW},
+    [63] = {SWORD_ART_DIFF_CAT_DEFAULT},
+    [64] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_FIST},
     [65] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_POLEARM},
     [66] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [67] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25202,24 +25131,24 @@ SwordArtsCategory = {
     [69] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [70] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [71] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [72] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD},
+    [72] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [73] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [74] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [75] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [76] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [90] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_DUELING_SHIELD},
+    [90] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD},
     [91] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM,
             SWORD_ART_DIFF_CAT_LARGE_WEAPON_SMALL_SHIELD, SWORD_ART_DIFF_CAT_POLEARM_SMALL_SHIELD,
             SWORD_ART_DIFF_CAT_LARGE_WEAPON_LARGE_SHIELD, SWORD_ART_DIFF_CAT_POLEARM_LARGE_SHIELD,
-            WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_DUELING_SHIELD},
+            WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD},
     [92] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_SHORT_SWORD, WEAPON_CATEGORY_CURVEDSWORD,
-            WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_THROW_DAGGER},
+            WEAPON_CATEGORY_SMALL_SHIELD},
     [93] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, SWORD_ART_DIFF_CAT_POLEARM},
     [94] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [95] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [96] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [97] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [98] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD, WEAPON_CATEGORY_DUELING_SHIELD},
+    [98] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_LARGE_SHIELD, WEAPON_CATEGORY_SMALL_SHIELD},
     [99] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [100] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [101] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25234,7 +25163,7 @@ SwordArtsCategory = {
     [111] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [112] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [113] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [114] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [114] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [115] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [116] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [117] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25242,19 +25171,19 @@ SwordArtsCategory = {
     [130] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [131] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [132] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [133] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [133] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [134] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [135] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [135] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [136] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [137] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_BACKHAND_SWORD, WEAPON_CATEGORY_LARGE_KATANA},
+    [137] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [140] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [141] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [142] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [142] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [143] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [144] = {SWORD_ART_DIFF_CAT_DEFAULT},
-    [150] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, WEAPON_CATEGORY_FIST, WEAPON_CATEGORY_MARTIAL_ARTS, WEAPON_CATEGORY_PERFUME_BOTTLE, WEAPON_CATEGORY_DUELING_SHIELD, WEAPON_CATEGORY_BEAST_CLAW},
-    [151] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
-    [152] = {SWORD_ART_DIFF_CAT_DEFAULT, WEAPON_CATEGORY_DUELING_SHIELD},
+    [150] = {SWORD_ART_DIFF_CAT_DEFAULT, SWORD_ART_DIFF_CAT_LARGE_WEAPON, WEAPON_CATEGORY_FIST},
+    [151] = {SWORD_ART_DIFF_CAT_DEFAULT},
+    [152] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [155] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [156] = {SWORD_ART_DIFF_CAT_DEFAULT},
     [157] = {SWORD_ART_DIFF_CAT_DEFAULT},
@@ -25776,202 +25705,6 @@ function GetSwordArtsPutOppositeWeapon()
     return result
 end
 
--- Table storing information about spells.
--- Concerns playing a "weapon retrieval" animation after
--- the spell was executed.
---
--- Table key: Magic ID (TAE ID minus 400)
--- Value 1: Right hand, magic cast from right hand
--- Value 2: Right hand, magic cast from left hand
--- Value 3: Left hand
---
--- TRUE: Weapon was sheathed during animation, play retrieval animation.
--- FALSE: Weapon was used to perform the magic, no retrieval animation.
-MagicPutOppositeWeapon = {
-    [0] = {TRUE, TRUE, TRUE},
-    [1] = {FALSE, FALSE, TRUE},
-    [2] = {FALSE, FALSE, TRUE},
-    [3] = {FALSE, FALSE, TRUE},
-    [4] = {FALSE, FALSE, TRUE},
-    [5] = {TRUE, TRUE, TRUE},
-    [6] = {TRUE, TRUE, TRUE},
-    [7] = {TRUE, TRUE, TRUE},
-    [8] = {FALSE, FALSE, TRUE},
-    [9] = {FALSE, FALSE, TRUE},
-    [10] = {FALSE, FALSE, TRUE},
-    [11] = {FALSE, FALSE, TRUE},
-    [12] = {FALSE, FALSE, TRUE},
-    [13] = {FALSE, FALSE, TRUE},
-    [14] = {TRUE, TRUE, TRUE},
-    [15] = {TRUE, TRUE, TRUE},
-    [16] = {FALSE, FALSE, TRUE},
-    [17] = {FALSE, FALSE, TRUE},
-    [18] = {FALSE, FALSE, TRUE},
-    [19] = {FALSE, FALSE, TRUE},
-    [20] = {FALSE, FALSE, TRUE},
-    [21] = {FALSE, FALSE, TRUE},
-    [22] = {TRUE, TRUE, TRUE},
-    [23] = {FALSE, FALSE, TRUE},
-    [24] = {TRUE, TRUE, TRUE},
-    [25] = {FALSE, FALSE, TRUE},
-    [26] = {FALSE, FALSE, TRUE},
-    [27] = {FALSE, FALSE, TRUE},
-    [28] = {FALSE, FALSE, TRUE},
-    [29] = {FALSE, FALSE, TRUE},
-    [30] = {FALSE, FALSE, TRUE},
-    [31] = {FALSE, FALSE, TRUE},
-    [32] = {FALSE, FALSE, TRUE},
-    [33] = {FALSE, FALSE, TRUE},
-    [34] = {FALSE, FALSE, TRUE},
-    [35] = {FALSE, FALSE, TRUE},
-    [36] = {FALSE, FALSE, TRUE},
-    [37] = {FALSE, FALSE, TRUE},
-    [38] = {FALSE, FALSE, TRUE},
-    [39] = {FALSE, FALSE, TRUE},
-    [40] = {FALSE, FALSE, TRUE},
-    [41] = {FALSE, FALSE, TRUE},
-    [42] = {FALSE, FALSE, TRUE},
-    [43] = {FALSE, FALSE, TRUE},
-    [44] = {FALSE, FALSE, TRUE},
-    [45] = {FALSE, FALSE, TRUE},
-    [46] = {FALSE, FALSE, TRUE},
-    [47] = {FALSE, FALSE, TRUE},
-    [48] = {TRUE, TRUE, TRUE},
-    [49] = {FALSE, FALSE, TRUE},
-    [50] = {TRUE, TRUE, TRUE},
-    [51] = {TRUE, TRUE, TRUE},
-    [52] = {FALSE, FALSE, TRUE},
-    [53] = {FALSE, FALSE, TRUE},
-    [54] = {TRUE, TRUE, TRUE},
-    [55] = {TRUE, TRUE, TRUE},
-    [56] = {TRUE, TRUE, TRUE},
-    [57] = {TRUE, TRUE, TRUE},
-    [58] = {TRUE, TRUE, TRUE},
-    [59] = {FALSE, FALSE, TRUE},
-    [60] = {TRUE, TRUE, TRUE},
-    [61] = {FALSE, FALSE, TRUE},
-    [62] = {FALSE, FALSE, TRUE},
-    [63] = {FALSE, FALSE, TRUE},
-    [64] = {FALSE, FALSE, TRUE},
-    [65] = {FALSE, FALSE, TRUE},
-    [66] = {FALSE, FALSE, TRUE},
-    [67] = {TRUE, TRUE, TRUE},
-    [68] = {FALSE, FALSE, TRUE},
-    [69] = {FALSE, FALSE, TRUE},
-    [70] = {FALSE, FALSE, TRUE},
-    [71] = {TRUE, TRUE, TRUE},
-    [72] = {FALSE, FALSE, TRUE},
-    [73] = {FALSE, FALSE, TRUE},
-    [74] = {TRUE, TRUE, TRUE},
-    [75] = {FALSE, FALSE, TRUE},
-    [76] = {FALSE, FALSE, TRUE},
-    [77] = {FALSE, FALSE, TRUE},
-    [78] = {FALSE, FALSE, TRUE},
-    [79] = {FALSE, FALSE, TRUE},
-    [80] = {FALSE, FALSE, TRUE},
-    [81] = {TRUE, TRUE, TRUE},
-    [82] = {TRUE, TRUE, TRUE},
-    [83] = {FALSE, FALSE, TRUE},
-    [84] = {FALSE, FALSE, TRUE},
-    [85] = {FALSE, FALSE, TRUE},
-    [86] = {TRUE, TRUE, TRUE},
-    [87] = {TRUE, TRUE, TRUE},
-    [88] = {TRUE, TRUE, TRUE},
-    [89] = {TRUE, TRUE, TRUE},
-    [90] = {TRUE, TRUE, TRUE},
-    [91] = {TRUE, TRUE, TRUE},
-    [92] = {FALSE, FALSE, TRUE},
-    [93] = {FALSE, FALSE, TRUE},
-    [94] = {FALSE, FALSE, TRUE},
-    [95] = {FALSE, FALSE, TRUE},
-    [96] = {FALSE, FALSE, TRUE},
-    [97] = {FALSE, FALSE, TRUE},
-    [98] = {TRUE, TRUE, TRUE},
-    [99] = {FALSE, FALSE, TRUE},
-    [100] = {FALSE, FALSE, TRUE},
-    [101] = {FALSE, FALSE, TRUE},
-    [102] = {TRUE, TRUE, TRUE},
-    [103] = {FALSE, FALSE, TRUE},
-    [104] = {FALSE, FALSE, TRUE},
-    [105] = {TRUE, TRUE, TRUE},
-    [106] = {FALSE, FALSE, TRUE},
-    [107] = {FALSE, FALSE, TRUE},
-    [108] = {FALSE, FALSE, TRUE},
-    [109] = {FALSE, FALSE, TRUE},
-    [110] = {FALSE, FALSE, TRUE},
-    [111] = {FALSE, FALSE, TRUE},
-    [112] = {FALSE, FALSE, TRUE},
-    [113] = {FALSE, FALSE, TRUE},
-    [114] = {FALSE, FALSE, TRUE},
-    [115] = {TRUE, TRUE, TRUE},
-    [116] = {TRUE, TRUE, TRUE},
-    [117] = {FALSE, FALSE, TRUE},
-    [118] = {FALSE, FALSE, TRUE},
-    [119] = {FALSE, FALSE, TRUE},
-    [120] = {TRUE, TRUE, TRUE},
-    [121] = {TRUE, TRUE, TRUE},
-    [122] = {TRUE, TRUE, TRUE},
-    [123] = {TRUE, TRUE, TRUE},
-    [124] = {FALSE, FALSE, TRUE},
-    [125] = {TRUE, TRUE, TRUE},
-    [126] = {FALSE, FALSE, TRUE},
-    [127] = {FALSE, FALSE, TRUE},
-    [128] = {TRUE, TRUE, TRUE},
-    [129] = {TRUE, TRUE, TRUE},
-    [130] = {TRUE, TRUE, TRUE},
-    [131] = {TRUE, TRUE, TRUE},
-    [132] = {FALSE, FALSE, TRUE},
-    [133] = {TRUE, TRUE, TRUE},
-    [134] = {FALSE, TRUE, TRUE},
-    [135] = {TRUE, TRUE, TRUE},
-    [136] = {TRUE, TRUE, TRUE},
-    [137] = {TRUE, TRUE, TRUE},
-    [138] = {FALSE, FALSE, TRUE},
-    [139] = {FALSE, FALSE, TRUE},
-    [140] = {FALSE, FALSE, TRUE},
-    [141] = {FALSE, FALSE, TRUE},
-    [142] = {FALSE, FALSE, TRUE},
-    [143] = {FALSE, FALSE, TRUE},
-    [144] = {TRUE, TRUE, TRUE},
-    [145] = {FALSE, FALSE, TRUE},
-    [146] = {TRUE, TRUE, TRUE},
-    [147] = {TRUE, TRUE, TRUE},
-    [148] = {FALSE, FALSE, TRUE},
-    [149] = {FALSE, FALSE, TRUE},
-    [150] = {TRUE, TRUE, TRUE},
-    [151] = {FALSE, FALSE, TRUE},
-    [152] = {TRUE, TRUE, TRUE},
-    [153] = {FALSE, FALSE, TRUE},
-    [154] = {FALSE, FALSE, TRUE},
-    [155] = {FALSE, FALSE, TRUE},
-    [156] = {TRUE, TRUE, TRUE},
-    [157] = {TRUE, TRUE, TRUE},
-    [158] = {FALSE, FALSE, TRUE},
-    [159] = {TRUE, TRUE, TRUE},
-    [160] = {FALSE, FALSE, TRUE},
-    [161] = {TRUE, TRUE, TRUE}
-}
-
--- Decides whether to perform a "retrieve weapon" animation after finishing a magic spell.
--- See the above table for reference.
-function GetMagicPutOppositeWeapon()
-    local result = FALSE
-
-    if MagicPutOppositeWeapon[g_MagicIndex] ~= nil then -- ivi: Sanity check for custom spells
-        if c_Style == HAND_RIGHT then
-            if g_Magichand == HAND_RIGHT then
-                result = MagicPutOppositeWeapon[g_MagicIndex][1]
-            else
-                result = MagicPutOppositeWeapon[g_MagicIndex][2]
-            end
-        else
-            result = MagicPutOppositeWeapon[g_MagicIndex][3]
-        end
-    end
-
-    return result
-end
-
 ------------------------------------------
 -- Core: Helper Functions
 ------------------------------------------
@@ -26267,62 +26000,53 @@ GetWeaponSwitchStatus = 359
 IsEquipmentMenuOpen = 360
 GetRemainingArrowCount = 361
 GetSpEffectType = 362 -- args: <enum> SP_EFFECT_TYPE_
-IsPlayerInRangeOfMount = 363
+Unknown363 = 363
 GetEventID = 364
-IsMultiplayer = 365
+Unknown365 = 365
 GetSpiritspringJumpHeight = 366
-IsAutomaticTesting = 368
+Unknown368 = 368
 
 GetPoise = 400
 GetMaxPoise = 402
 GetSpEffectEventAnimID = 403
-GetNpcAIAttackRequestID = 404
-GetNpcAIAttackRequestIDAfterBlend = 405
+Unknown404 = 404
+Unknown405 = 405
 GetRollAngle = 406
 GetJumpAngle = 407
 GetSwordArtsRollAngle = 408
 GetDamageSpecialAttribute = 409 -- args: <index>
 
 IsOnMount = 500
-IsMount = 502
+Unknown502 = 502
 IsSummoningRide = 504
 IsMovingOnMount = 505
 IsIdleOnMount = 506
-GetMountRidingAnimID = 507
-GetDismountingDirection = 520
-GetDismountingDirectionRun = 521
 GetMountReceivedDamageDirection = 522 -- args: <unknown>
 GetMountDamageLevel = 530
-GetMountGuardLevel = 531
-GetMountAttackDirection = 532
 GetMountRecievedDamageAngle = 533
 GetMountRecievedDamageType = 534
 HasMountReceivedAnyDamage = 535
-GetMountGuardLevelAction = 536
 IsMountFalling = 537
 GetMountFallHeight = 538
 IsMountInFallLoop = 539
 IsMountTrulyLanding = 540
-IsMountFallingDeadly = 541
-GetPhysicalAttributeMount = 542
 GetMountSpecialAttribute = 543
-GetSlope = 544
 IsMountDead = 545
 GetMountIsWeakPoint = 546
 GetMountDamageAnimID = 547
-InNoRidingArea = 548
+Unknown548 = 548
 GetMountSpEffectID = 549
 GetMountSpEffectType = 550
 GetMountStateInfo = 551
-IsNewRidingTest = 552
+Unknown552 = 552
 GetMountBehaviorID = 553
 GetMountStatusEffect = 554
-IsRidingPcMount = 555
+Unknown555 = 555
 
 GetFlyRouteState = 600
 
-IsAIJumpRequested = 700
-IsAIJumping = 701
+Unknown700 = 700
+Unknown701 = 701
 
 GetHP = 1000
 GetStamina = 1001
@@ -26379,8 +26103,8 @@ IsCeremonyComplete = 2017
 IsCeremonyInterrupt = 2018
 
 IsSpeaking = 3000
-GetTalkBehavior = 3001
-GetTalkEzStateBehaviourID = 3002
+GetTalkID_3001 = 3001
+GetTalkID_3002 = 3002
 
 Unknown9999 = 9999
 
@@ -26451,7 +26175,7 @@ InterruptAttack = 143
 SkyDeathWarp = 144
 ClearSlopeInfo = 145
 ReceiveStateInput = 146
-SetCanChangeEquipmentOn = 147
+SetIsEquipmentChangeableFromMenu = 147
 SetHavokVariable = 148 -- args: <string>, <value>
 AimAtSelfPosition = 149
 SetIsItemAnimationPlaying = 150
@@ -26466,8 +26190,8 @@ RequestAIReplanning = 158
 TurnTowardAttacker = 159
 SetThrowPossibilityState_Attacker = 160 -- args: <index>
 SetThrowPossibilityState_Defender = 161 -- args: <index>
-NotifyAIMagicCast = 162
-SetCanChangeEquipmentOff = 163
+MarkOfGreedyPersonSlipDamageDisable = 162
+Unknown163 = 163
 
 StateIdentifier = 200
 
@@ -26501,25 +26225,27 @@ LadderSlideDownCancel = 2021
 DisableMagicIDSwitching = 2022
 DisableToolIDSwitching = 2023
 UseItemDecision = 2024
-SetNpcAIAttackRequestIDAfterBlend = 2025 -- args: <value>
-DecideMagicUse = 2026
-FallPreventionAssist = 2027
-FaceDirection = 2029 -- args: <degrees>
+Unknown2025 = 2025 -- args: <value>
+Unknown2026 = 2026
+Unknown2027 = 2027
+Unknown2029 = 2029 -- args: <value>
 ChangeBuddyState = 2030
 PlayEventSync = 2031
-AllowBuddyWarp = 2040
-NotifyAIOfBehaviourState = 2050 -- args: <index>, <index> # IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE
+Unknown2040 = 2040
+Unknown2050 = 2050 -- args: <index>, <index> # IDX_AINOTE_STATETYPE, IDX_AINOTE_STATETYPE
 
-Mounting = 3000
+Unknown3000 = 3000
+Unknown3001 = 3001
+Unknown3002 = 3002
 PlayRideAnim = 3003
 ApplyRideBlend = 3004 -- args: <blend anim>, <rate>
-Dismount = 3005
-AllowMounting = 3006
+Unknown3005 = 3005
+Unknown3006 = 3006
 ApplyDamageFlag = 3007 -- args: <index>
 
-RequestAIJumpInterupt = 4000
-NotifyAIOfJumpState = 4001
-AIJumpState = 4002
+GetPoise0 = 4000
+GetPoise1 = 4001
+GetPoise2 = 4002
 
 DebugLogOutput = 9000
 ClearSpEffect = 9001 -- args: <id>
