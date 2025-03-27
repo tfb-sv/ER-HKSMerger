@@ -175,3 +175,5 @@ z.ex
 data
 builders
 *.zip
+inputs/
+outputs/
