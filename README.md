@@ -2,7 +2,7 @@
 
 # Elden Ring HKS Merger
 
-**ER-HKSMerger** is a modding tool for Elden Ring that automates and simplifies the HKS merging procedure, particularly the cumbersome task of finding changed lines and their locations within the thousands of lines in HKS files. The tool is built upon the <u>Merge3 algorithm</u>.
+**ER-HKSMerger** is a modding tool for Elden Ring that automates and simplifies the HKS merging procedure, particularly the cumbersome task of finding changed lines and their locations within the thousands of lines in HKS files. The tool is built upon the **Merge3 algorithm**.
 
 - [NexusMods Page](https://www.nexusmods.com/eldenring/mods/6795)
 
@@ -23,7 +23,7 @@
 ## Notes
 - Specifically designed to operate on the **Windows** platform.
 - Currently supports only `c0000.hks` files.
-- The tool automatically upgrades older HKS files to the latest supported version, which is version 17.
+- The tool automatically upgrades older HKS files to the latest supported version, which is **version 17**.
 - You can merge as many HKS files as you want at once; however, as the number of files increases and the extent of their differences grows, the chance of merge conflicts also increases. Therefore, it's recommended to test the merged HKS files, as manual adjustments may occasionally be necessary.
 
 ## Contributing
