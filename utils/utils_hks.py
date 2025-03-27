@@ -56,9 +56,9 @@ def get_hks_version(fn):
     print(f"\t> File version is checked. Version: {hks_version}")
     return hks_version
 
-def normalize_all_hks(in_fns):
+def normalize_all_hks():
     if not os.path.exists(in_dir): raise ValueError(no_file_text)
-    for fn in all_fns:
+    for fn in in_fns:
         check_fn(fn)
         hks_version = get_hks_version(fn)
         if hks_version is None: raise ValueError(no_v_text)
@@ -113,7 +113,7 @@ def recursive_merge(recursive_input):
     recursive_output = [new_in_groups, new_name_groups, ref_lines, stage_cnt+1, ref_name]
     return recursive_merge(recursive_output)
 
-def merge_all_hks(in_fns):
+def merge_all_hks():
     if len(in_fns) < 2: raise ValueError(no_file_text)
     ref_lines = read_file(last_ref_fp)
     ref_fn = last_ref_fp.split("/")[1]
