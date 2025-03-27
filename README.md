@@ -4,7 +4,7 @@
 
 **ER-HKSMerger** is a modding tool for Elden Ring that automates and simplifies the HKS merging procedure, particularly the cumbersome task of finding changed lines and their locations within the thousands of lines in HKS files. The tool is built upon the **Merge3 algorithm**.
 
-- [NexusMods Page](https://www.nexusmods.com/eldenring/mods/6795)
+- [NexusMods Page](https://www.nexusmods.com/eldenring/mods/7660)
 
 ## Installation
 1. Download the latest release of the tool.
@@ -21,13 +21,18 @@
 3. The merged HKS file is generated in the `outputs` folder as `c0000_merged.hks`.
 
 ## Notes
+- Tested on **v1.16**.
+- This is not a mod but a tool that allows you to create mods.
 - Specifically designed to operate on the **Windows** platform.
-- Currently supports only `c0000.hks` files.
+- Currently supports only HKS files of the player character, which is **c0000**.
 - The tool automatically upgrades older HKS files to the latest supported version, which is **version 17**.
-- You can merge as many HKS files as you want at once; however, as the number of files increases and the extent of their differences grows, the chance of merge conflicts also increases. Therefore, it's recommended to test the merged HKS files, as manual adjustments may occasionally be necessary.
+- You can merge as many HKS files as you want at once; however, as the number of files increases and the extent of their differences grows, the chance of merge conflicts also increases. Therefore, it's recommended to test the merged files, as manual adjustments may occasionally be necessary.
+
+## Additional Information
+- To uninstall, simply delete the tool's folder.
 
 ## Contributing
-Feedback and contributions are highly valued. Issues or suggestions for improvements can be reported by opening an issue on the [GitHub page](https://github.com/tfb-sv/ER-HKSMerger.git), or by creating a post or posting a bug on [NexusMods page](https://www.nexusmods.com/eldenring/mods/6795). Please report any anomalies in the terminal.
+Feedback and contributions are highly valued. Issues or suggestions for improvements can be reported by opening an issue on the [GitHub page](https://github.com/tfb-sv/ER-HKSMerger.git), or by creating a post or posting a bug on [NexusMods page](https://www.nexusmods.com/eldenring/mods/7660). Please report any anomalies in the terminal.
 
 ## License
 © 2025 [ineedthetail](https://github.com/tfb-sv).
