@@ -31,6 +31,8 @@ last_version = 17
 last_ref_fp = f"{ref_dir}/{char_id}_ref_v{last_version}.hks"
 out_fn = f"{char_id}_merged.hks"
 
+in_fns = [fn for fn in os.listdir(in_dir) if fn != ".gitkeep"]
+
 def read_file(fp):
     with open(fp, 'r', encoding="utf8") as f: lines = f.readlines()
     return lines
@@ -54,7 +56,7 @@ def get_hks_version(fn):
     print(f"\t> File version is checked. Version: {hks_version}")
     return hks_version
 
-def normalize_all_hks(all_fns):
+def normalize_all_hks(in_fns):
     if not os.path.exists(in_dir): raise ValueError(no_file_text)
     for fn in all_fns:
         check_fn(fn)

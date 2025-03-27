@@ -3,9 +3,8 @@ import traceback
 from utils.utils_hks import *
 
 def main():
-    all_fns = os.listdir(in_dir)
-    normalize_all_hks(all_fns)
-    _, _ = merge_all_hks(all_fns)
+    normalize_all_hks()
+    _, _ = merge_all_hks()
 
 if __name__ == "__main__":
     try: main()
