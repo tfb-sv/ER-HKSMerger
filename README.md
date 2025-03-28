@@ -26,7 +26,7 @@
 - Specifically designed to operate on the **Windows** platform.
 - Currently supports only HKS files of the player character, which is **c0000**.
 - The tool automatically upgrades older HKS files to the latest supported version, which is **version 17**.
-- You can merge as many HKS files as you want at once; however, as the number of files increases and the extent of their differences grows, the chance of merge conflicts also increases. Therefore, it's recommended to test the merged files, as manual adjustments may occasionally be necessary.
+- You can merge as many HKS files as you want at once; however, as the number of files increases and the extent of their differences grows, the chance of merge conflicts also increases. Therefore, it's recommended to test the merged files, as manual adjustments may rarely be necessary.
 - The 6th line of `c0000.hks` files must contain version information, which is usually present. However, some mod creators intentionally remove this and similar metadata. In such cases, the tool cannot merge these files.
 
 ## Additional Information
