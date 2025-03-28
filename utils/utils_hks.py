@@ -24,6 +24,7 @@ wrong_fn_text = (
     "\n\nInvalid filename format!\n"
     "Must follow the format 'c0000_<something>.hks', where <something> contains only letters and digits."
 )
+
 supported_vers = [11, 12, 13, 14, 15, 16, 17]
 
 char_id = "c0000"
