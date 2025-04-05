@@ -8,7 +8,7 @@ ref_dir = "refs"
 
 no_file_text = (
     "\n\nUnable to find HKS files!\n"
-    "There should be at least 2 HKS files in the 'inputs' folder."
+    'There should be at least 2 HKS files in the "inputs" folder.'
 )
 
 no_v_text = (
@@ -18,17 +18,17 @@ no_v_text = (
 
 wrong_v_text = (
     "\n\nVersion incompatibility!\n"
-    "Supported reference versions are 14, 15, and 17."
+    "Supported reference versions are from 11 to 17, inclusive."
 )
 wrong_fn_text = (
     "\n\nInvalid filename format!\n"
-    "Must follow the format 'c0000_<something>.hks', where <something> contains only letters and digits."
+    'Must follow the format "c0000_<tag>.hks", where "<tag>" contains only letters and digits.'
 )
 
-supported_vers = [11, 12, 13, 14, 15, 16, 17]
+last_version = 17
+supported_vers = list(range(11, last_version + 1))
 
 char_id = "c0000"
-last_version = 17
 last_ref_fp = f"{ref_dir}/{char_id}_ref_v{last_version}.hks"
 out_fn = f"{char_id}_merged.hks"
 
@@ -42,7 +42,7 @@ def write_file(fp, lines):
     with open(fp, 'w', encoding="utf8") as f: f.writelines(lines)
 
 def check_fn(fn):
-    print(f"File '{fn}':\n\t> Checking the filename format..")
+    print(f'File "{fn}":\n\t> Checking the filename format..')
     pattern = r"^c0000_[a-zA-Z0-9]+\.hks$"
     if not re.match(pattern, fn): raise ValueError(wrong_fn_text)
     print("\t> Filename format is correct.")
@@ -85,10 +85,10 @@ def merger_core(ref, a, b):
     return merged
 
 def recursive_merge(recursive_input):
-    [in_fns, in_names, ref_lines, stage_cnt, ref_name] = recursive_input
+    [in_fns, in_names, ref_lines, stage_cnt, ref_name] = recursive_input  # , cnt
     in_groups = [in_fns[i:i + 2] for i in range(0, len(in_fns), 2)]
     name_groups = [in_names[i:i + 2] for i in range(0, len(in_names), 2)]
-    if len(in_groups[0]) == 1: return in_groups[0][0], name_groups[0][0]
+    if len(in_groups[0]) == 1: return in_groups[0][0], name_groups[0][0]  # , cnt
     print(f"\nStage {stage_cnt+1}:")
     print(f"\t{name_groups} =")
     new_in_groups = []
@@ -107,12 +107,52 @@ def recursive_merge(recursive_input):
             a = read_file(f"{in_dir}/{a}") if isinstance(a, str) else a
             b = read_file(f"{in_dir}/{b}") if isinstance(b, str) else b
         merged_lines = merger_core(ref_lines, a, b)
+        # merged_lines, cnt1 = deal_with_merge_conflicts(merged_lines, a_name, b_name, stage_cnt)
         merged_names = f"{a_name}-{b_name}"
         print(f"\t\t({ref_name}, {a_name}, {b_name})")
+        # if cnt1 > 0: print(f"\t\t{cnt1} merge conflict(s) occurred between the {a_name.capitalize()} and {b_name.capitalize()} mods!")
+        # cnt += cnt1
         new_in_groups.append(merged_lines)
         new_name_groups.append(merged_names)
-    recursive_output = [new_in_groups, new_name_groups, ref_lines, stage_cnt+1, ref_name]
+    recursive_output = [new_in_groups, new_name_groups, ref_lines, stage_cnt+1, ref_name]  # , cnt
     return recursive_merge(recursive_output)
+
+# def deal_with_merge_conflicts(merged_lines, a_n, b_n, stage_cnt):
+    # c_s = "<<<<<<<"
+    # c_m = "======="
+    # c_e = ">>>>>>>"
+    # new_merged_lines = []
+    # cnt = 0
+    # for line in merged_lines:
+        # if c_s in line:
+            # cnt += 1
+            # line = line.replace(c_s, f"-- {c_s} - Start of the Conflict {cnt} > {a_n.capitalize()} Code")
+        # elif c_m in line:
+            # line = line.replace(c_m, f"-- {c_m} - Middle of the Conflict {cnt} > {b_n.capitalize()} Code")
+        # elif c_e in line:
+            # line = line.replace(c_e, f"-- {c_e} - End of the Conflict {cnt}")
+        # new_merged_lines.append(line)
+    # return new_merged_lines, cnt
+
+def comment_merge_conflicts(final_lines):
+    c_s = "<<<<<<<"
+    c_m = "======="
+    c_e = ">>>>>>>"
+    new_final_lines = []
+    cnt_s = cnt_m = cnt_e = 0
+    for line in final_lines:
+        if c_s in line:
+            cnt_s += 1
+            line = line.replace(c_s, f"-- {c_s} - MERGE CONFLICT #{cnt_s} START")
+        elif c_m in line:
+            cnt_m += 1
+            line = line.replace(c_m, f"-- {c_m} - MERGE CONFLICT #{cnt_m} MIDDLE")
+        elif c_e in line:
+            cnt_e += 1
+            line = line.replace(c_e, f"-- {c_e} - MERGE CONFLICT #{cnt_e} END")
+        new_final_lines.append(line)
+    assert cnt_s == cnt_m == cnt_e, "Conflict counters are not same!"
+    return new_final_lines, cnt_s
 
 def merge_all_hks():
     if len(in_fns) < 2: raise ValueError(no_file_text)
@@ -121,10 +161,12 @@ def merge_all_hks():
     ref_name = ref_fn[:-4].split("_")[1]
     in_names = [in_fn[:-4].split("_")[1] for in_fn in in_fns]
     stage_cnt = 0
-    recursive_input = [in_fns, in_names, ref_lines, stage_cnt, ref_name]
-    final_lines, final_name = recursive_merge(recursive_input)
+    recursive_input = [in_fns, in_names, ref_lines, stage_cnt, ref_name]  # , 0
+    final_lines, final_name = recursive_merge(recursive_input)  # , cnt
+    final_lines, cnt = comment_merge_conflicts(final_lines)
     if not os.path.exists(out_dir): os.mkdir(out_dir)
     out_fp = f"{out_dir}/{out_fn}"
     write_file(out_fp, final_lines)
-    print(f"\n> All {len(in_fns)} files merged successfully.\n")
+    if cnt > 0: print(f"\n> All {len(in_fns)} files were merged, but {cnt} merge conflict(s) occurred, which need to be resolved manually!\n")
+    else: print(f"\n> All {len(in_fns)} files were merged successfully!\n")
     return final_lines, final_name
