@@ -19,6 +19,7 @@
 1. Ensure that the steps outlined in the **Configuration** section are completed.
 2. Launch the `ER-HKSMerger.exe`.
 3. The merged HKS file is generated in the `outputs` folder as `c0000_merged.hks`.
+4. If you see any message related to `merge conflict` in the terminal, you need to manually fix the sections marked with `MERGE CONFLICT` in the merged file. Otherwise, you may encounter unexpected behavior — such as the character not moving, etc.
 
 ## Notes
 - Tested on **v1.16**.
